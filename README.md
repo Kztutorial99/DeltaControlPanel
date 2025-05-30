@@ -109,6 +109,3 @@ Dikembangkan dengan ❤️ oleh Kztutorial99
 <p align="center">
   <img src="https://media.giphy.com/media/26gscSULUcfKU7dWU/giphy.gif" width="180px"/>
   <br><b>Delta Control Panel — Smart, Secure & Simple</b>
-</p>EOF
-
-> 💡 Jalankan script di atas di terminal Anda (bash/Termux) untuk membuat langsung `README.md` dengan isi VIP dan animasi. Jika Anda ingin menambahkan link custom atau badge tambahan, tinggal ganti bagian di atas.
