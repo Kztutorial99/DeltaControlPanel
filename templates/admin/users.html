@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Admin - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-users text-primary me-2"></i>
+                        User Management
+                    </h1>
+                    <p class="text-muted mb-0">Manage users and payment verifications</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="refreshData()">
+                        <i class="fas fa-sync me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-primary border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary bg-opacity-10 rounded me-3">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ users|length }}</h4>
+                        <small class="text-muted">Total Users</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-warning border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning bg-opacity-10 rounded me-3">
+                        <i class="fas fa-crown text-warning"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ users|selectattr('is_premium', 'equalto', true)|list|length }}</h4>
+                        <small class="text-muted">Premium Users</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-danger border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-danger bg-opacity-10 rounded me-3">
+                        <i class="fas fa-clock text-danger"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ pending_payments|length }}</h4>
+                        <small class="text-muted">Pending Payments</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-success border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success bg-opacity-10 rounded me-3">
+                        <i class="fas fa-user-check text-success"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ users|selectattr('is_active', 'equalto', true)|list|length }}</h4>
+                        <small class="text-muted">Active Users</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Users Table -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-table text-info me-2"></i>
+                            All Users
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="userFilter" style="width: auto;">
+                                <option value="all">All Users</option>
+                                <option value="premium">Premium Only</option>
+                                <option value="free">Free Only</option>
+                                <option value="admin">Admins Only</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Subscription</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr class="user-row" 
+                                    data-premium="{{ user.is_premium }}"
+                                    data-admin="{{ user.is_admin }}"
+                                    data-active="{{ user.is_active }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                {% if user.is_admin %}
+                                                    <i class="fas fa-user-shield"></i>
+                                                {% elif user.is_premium_active() %}
+                                                    <i class="fas fa-crown"></i>
+                                                {% else %}
+                                                    <i class="fas fa-user"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ user.username }}</div>
+                                                <small class="text-muted">ID: {{ user.id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">{{ user.email }}</span>
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                        
+                                        {% if user.is_admin %}
+                                            <span class="badge bg-warning text-dark ms-1">Admin</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.is_premium_active() %}
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-crown me-1"></i>Premium
+                                            </span>
+                                            {% if user.premium_expires %}
+                                                <div class="small text-muted">
+                                                    Expires: {{ user.premium_expires.strftime('%Y-%m-%d') }}
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-secondary">Free</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% if user.last_login %}
+                                                {{ user.last_login|datetime }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <form method="POST" action="{{ url_for('toggle_user_premium', user_id=user.id) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-outline-warning" 
+                                                        title="Toggle Premium Status">
+                                                    <i class="fas fa-crown"></i>
+                                                </button>
+                                            </form>
+                                            <button class="btn btn-outline-info" 
+                                                    onclick="viewUserDetails({{ user.id }})"
+                                                    title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-credit-card text-warning me-2"></i>
+                        Pending Payments
+                        {% if pending_payments %}
+                            <span class="badge bg-danger ms-2">{{ pending_payments|length }}</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_payments %}
+                        <div class="payment-list">
+                            {% for payment in pending_payments %}
+                            <div class="payment-item border rounded p-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="fw-medium">{{ payment.user.username }}</div>
+                                        <small class="text-muted">{{ payment.created_at|datetime }}</small>
+                                    </div>
+                                    <span class="badge bg-primary">{{ payment.payment_method }}</span>
+                                </div>
+                                
+                                <div class="payment-details mb-3">
+                                    <div class="small text-muted mb-1">Amount:</div>
+                                    <div class="fw-medium">{{ payment.amount|currency }}</div>
+                                    
+                                    <div class="small text-muted mb-1 mt-2">Reference:</div>
+                                    <div class="font-monospace small">{{ payment.payment_reference }}</div>
+                                </div>
+                                
+                                <form method="POST" action="{{ url_for('verify_payment', payment_id=payment.id) }}">
+                                    <div class="mb-2">
+                                        <textarea class="form-control form-control-sm" 
+                                                  name="notes" 
+                                                  placeholder="Verification notes..."
+                                                  rows="2"></textarea>
+                                    </div>
+                                    <div class="d-grid gap-1">
+                                        <button type="submit" name="action" value="approve" 
+                                                class="btn btn-success btn-sm">
+                                            <i class="fas fa-check me-1"></i>Approve
+                                        </button>
+                                        <button type="submit" name="action" value="reject" 
+                                                class="btn btn-danger btn-sm">
+                                            <i class="fas fa-times me-1"></i>Reject
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success mb-3" style="font-size: 2rem;"></i>
+                            <h6 class="text-muted">No Pending Payments</h6>
+                            <p class="text-muted small mb-0">All payment verifications are up to date.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-circle me-2"></i>User Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userDetailsContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Filter users
+document.getElementById('userFilter').addEventListener('change', function() {
+    const filter = this.value;
+    const rows = document.querySelectorAll('.user-row');
+    
+    rows.forEach(row => {
+        let show = true;
+        
+        switch(filter) {
+            case 'premium':
+                show = row.dataset.premium === 'True';
+                break;
+            case 'free':
+                show = row.dataset.premium === 'False';
+                break;
+            case 'admin':
+                show = row.dataset.admin === 'True';
+                break;
+            case 'all':
+            default:
+                show = true;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+});
+
+// View user details
+function viewUserDetails(userId) {
+    const modal = new bootstrap.Modal(document.getElementById('userDetailsModal'));
+    const content = document.getElementById('userDetailsContent');
+    
+    // Show loading
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Simulate loading user details (in real app, this would be an AJAX call)
+    setTimeout(() => {
+        const userRow = document.querySelector(`[data-user-id="${userId}"]`);
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Basic Information</h6>
+                    <table class="table table-sm">
+                        <tr><td>User ID:</td><td>${userId}</td></tr>
+                        <tr><td>Username:</td><td>Loading...</td></tr>
+                        <tr><td>Email:</td><td>Loading...</td></tr>
+                        <tr><td>Status:</td><td>Loading...</td></tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>Activity</h6>
+                    <table class="table table-sm">
+                        <tr><td>Total Requests:</td><td>Loading...</td></tr>
+                        <tr><td>Successful:</td><td>Loading...</td></tr>
+                        <tr><td>Failed:</td><td>Loading...</td></tr>
+                        <tr><td>Last Activity:</td><td>Loading...</td></tr>
+                    </table>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+// Refresh data
+function refreshData() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
+}
+
+// Auto-refresh every 2 minutes
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        location.reload();
+    }
+}, 120000);
+
+// Confirm payment actions
+document.querySelectorAll('form[action*="verify_payment"]').forEach(form => {
+    form.addEventListener('submit', function(e) {
+        const action = e.submitter.value;
+        const username = this.closest('.payment-item').querySelector('.fw-medium').textContent;
+        
+        if (!confirm(`Are you sure you want to ${action} payment for ${username}?`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="admin-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-cog me-2"></i>Admin Panel
+            </h1>
+            <p class="text-muted mb-0">System management and monitoring</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <span class="badge bg-danger">
+                <i class="fas fa-shield-alt me-1"></i>ADMIN ACCESS
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- System Statistics -->
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="admin-stat-card bg-primary">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.total_users }}</h3>
+                <p>Total Users</p>
+                <small>{{ stats.active_users }} active</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="admin-stat-card bg-success">
+            <div class="stat-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.premium_users }}</h3>
+                <p>Premium Users</p>
+                <small>{{ ((stats.premium_users / stats.total_users) * 100) | round(1) }}% of total</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="admin-stat-card bg-info">
+            <div class="stat-icon">
+                <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.total_requests }}</h3>
+                <p>Total Requests</p>
+                <small>{{ stats.successful_requests }} successful</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="admin-stat-card bg-warning">
+            <div class="stat-icon">
+                <i class="fas fa-credit-card"></i>
+            </div>
+            <div class="stat-info">
+                <h3>{{ stats.pending_payments }}</h3>
+                <p>Pending Payments</p>
+                <small>{{ stats.unread_messages }} new messages</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Admin Content -->
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-lg-8">
+        <!-- Pending Payments -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-credit-card me-2"></i>Pending Payment Verifications
+                </h5>
+                <span class="badge bg-warning">{{ pending_payments|length }} pending</span>
+            </div>
+            <div class="card-body">
+                {% if pending_payments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Transaction ID</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in pending_payments %}
+                            <tr>
+                                <td>
+                                    <div class="user-info">
+                                        <strong>{{ payment.user.username }}</strong>
+                                        <br><small class="text-muted">{{ payment.user.email }}</small>
+                                    </div>
+                                </td>
+                                <td class="text-success font-weight-bold">
+                                    Rp {{ "{:,.0f}".format(payment.amount) }}
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ payment.payment_method }}</span>
+                                </td>
+                                <td>
+                                    <code>{{ payment.transaction_id }}</code>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ payment.subscription_type }}</span>
+                                </td>
+                                <td class="text-muted">
+                                    {{ payment.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-success" 
+                                                onclick="verifyPayment('{{ payment.id }}', 'approve')">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        <button class="btn btn-danger" 
+                                                onclick="verifyPayment('{{ payment.id }}', 'reject')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-4">
+                    <i class="fas fa-check-circle text-success mb-3" style="font-size: 3rem;"></i>
+                    <h6 class="text-muted">No pending payments</h6>
+                    <p class="text-muted">All payments have been processed</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Users -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>Recent User Registrations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_item in recent_users %}
+                            <tr>
+                                <td>
+                                    <strong>{{ user_item.username }}</strong>
+                                    {% if user_item.is_admin %}
+                                    <span class="badge bg-danger ms-1">ADMIN</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_item.email }}</td>
+                                <td>
+                                    {% if user_item.is_premium %}
+                                    <span class="badge bg-warning text-dark">PREMIUM</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">FREE</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user_item.is_active %}
+                                    <span class="badge bg-success">ACTIVE</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">INACTIVE</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted">
+                                    {{ user_item.created_at.strftime('%d/%m/%Y') }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-4">
+        <!-- System Health -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-heartbeat me-2"></i>System Health
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="health-metric">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>Database</span>
+                        <span class="badge bg-success">Online</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: 98%"></div>
+                    </div>
+                </div>
+
+                <div class="health-metric">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>OTP Providers</span>
+                        <span class="badge bg-success">8/8 Online</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="health-metric">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>API Response</span>
+                        <span class="badge bg-success">< 200ms</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: 92%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Admin Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-tools me-2"></i>Quick Actions
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('admin_notifications') }}" class="btn btn-primary">
+                            <i class="fas fa-bell me-2"></i>Send Notification
+                        </a>
+                        <a href="{{ url_for('admin_saldo_management') }}" class="btn btn-success">
+                            <i class="fas fa-coins me-2"></i>Manage Saldo
+                        </a>
+                        <a href="#" class="btn btn-info" onclick="generateReport()">
+                            <i class="fas fa-chart-line me-2"></i>Generate Report
+                        </a>
+                        <a href="#" class="btn btn-secondary" onclick="exportData()">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </a>
+                        <form method="POST" action="{{ url_for('toggle_maintenance_mode') }}" class="d-inline">
+                            <button type="submit" class="btn btn-warning w-100" onclick="return confirmMaintenance()">
+                                <i class="fas fa-tools me-2"></i>
+                                {% if maintenance_mode == 'true' %}Disable{% else %}Enable{% endif %} Maintenance
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recent OTP Requests
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if recent_requests %}
+                <div class="activity-list">
+                    {% for request in recent_requests[:5] %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            {% if request.status == 'success' %}
+                            <i class="fas fa-check-circle text-success"></i>
+                            {% else %}
+                            <i class="fas fa-times-circle text-danger"></i>
+                            {% endif %}
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ request.provider.display_name }}</div>
+                            <div class="activity-desc">{{ request.user.username }}</div>
+                            <div class="activity-time">{{ request.created_at.strftime('%H:%M') }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Verification Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Payment Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="paymentForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="adminNotes" class="form-label">Admin Notes</label>
+                        <textarea class="form-control" id="adminNotes" name="admin_notes" rows="3"
+                                  placeholder="Enter verification notes or rejection reason..."></textarea>
+                    </div>
+                    <input type="hidden" id="paymentAction" name="action">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitPayment">Confirm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentPaymentId = null;
+
+function verifyPayment(paymentId, action) {
+    currentPaymentId = paymentId;
+    const modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    const form = document.getElementById('paymentForm');
+    const actionInput = document.getElementById('paymentAction');
+    const submitButton = document.getElementById('submitPayment');
+
+    form.action = `/admin/verify-payment/${paymentId}`;
+    actionInput.value = action;
+
+    if (action === 'approve') {
+        submitButton.className = 'btn btn-success';
+        submitButton.innerHTML = '<i class="fas fa-check me-1"></i>Approve Payment';
+        document.querySelector('.modal-title').textContent = 'Approve Payment';
+    } else {
+        submitButton.className = 'btn btn-danger';
+        submitButton.innerHTML = '<i class="fas fa-times me-1"></i>Reject Payment';
+        document.querySelector('.modal-title').textContent = 'Reject Payment';
+    }
+
+    modal.show();
+}
+
+function sendSystemMessage() {
+    // Implement system message functionality
+    alert('System message feature coming soon!');
+}
+
+function generateReport() {
+    // Implement report generation
+    alert('Report generation feature coming soon!');
+}
+
+function exportData() {
+    // Implement data export
+    alert('Data export feature coming soon!');
+}
+
+function systemMaintenance() {
+    // Implement maintenance mode
+    if (confirm('Enable maintenance mode? This will temporarily disable the platform.')) {
+        alert('Maintenance mode feature coming soon!');
+    }
+}
+
+function confirmMaintenance() {
+    return confirm('Are you sure you want to toggle maintenance mode?');
+}
+
+// Auto-refresh admin panel every 30 seconds
+setInterval(function() {
+    // Only refresh if no modals are open
+    if (!document.querySelector('.modal.show')) {
+        window.location.reload();
+    }
+}, 30000);
+
+// Real-time statistics updates
+function updateStats() {
+    // This would connect to WebSocket or polling endpoint
+    // For now, we'll use page refresh
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stat cards
+    const statCards = document.querySelectorAll('.admin-stat-card');
+    statCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.3s ease';
+
+            setTimeout(() => {
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

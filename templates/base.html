@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}DeltaPro - OTP Service Management Platform{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+
+    {% block extra_head %}{% endblock %}
+    <style>
+        /* Styling modal agar nyaman dibaca */
+        .modal-body p {
+            margin-bottom: 1rem;
+            color: #222;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        .modal-header.bg-warning {
+            background-color: #ffc107 !important;
+            color: #212529;
+        }
+        .modal-header.bg-primary {
+            background-color: #0d6efd !important;
+            color: #fff;
+        }
+        .btn-close {
+            transition: transform 0.3s ease;
+        }
+        .btn-close:hover {
+            transform: rotate(90deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('index') }}">
+                <i class="fas fa-shield-alt me-2"></i>DeltaPro
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if session.user_id %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('otp_services') }}">
+                                <i class="fas fa-mobile-alt me-1"></i>OTP Services
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('messages') }}">
+                                <i class="fas fa-envelope me-1"></i>Messages
+                            </a>
+                        </li>
+                        {% if session.is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin_panel') }}">
+                                <i class="fas fa-cog me-1"></i>Admin Panel
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if session.user_id %}
+                        <!-- Notification Bell -->
+                    <div class="nav-item me-3">
+                        <div class="notification-bell" onclick="toggleNotifications()">
+                            <i class="fas fa-bell fa-lg text-white"></i>
+                            <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                        </div>
+                    </div>
+
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            {% if get_current_user().is_premium %}
+                                <span class="badge bg-warning text-dark me-1">PREMIUM</span>
+                                {% endif %}
+                                <i class="fas fa-user-circle me-1"></i>{{ get_current_user().username }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('user_notifications') }}">
+                                    <i class="fas fa-bell me-2"></i>Notifications
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('user_settings') }}">
+                                    <i class="fas fa-cog me-2"></i>Settings
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('premium') }}">
+                                    <i class="fas fa-crown me-2"></i>Premium
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content" style="padding-top: 70px;">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' if category == 'info' else 'check-circle' if category == 'success' else 'exclamation-triangle' }} me-2"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-shield-alt me-2"></i>DeltaPro</h5>
+                    <p class="mb-0">Professional OTP Service Management Platform</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <i class="fas fa-lock me-1"></i>Secure & Reliable
+                        <span class="mx-2"></span>
+                        <i class="fas fa-clock me-1"></i>24/7 Support
+                        <span class="mx-2"></span>
+                        <a href="{{ url_for('disclaimer') }}" class="text-light text-decoration-none">
+                            <i class="fas fa-exclamation-circle me-1"></i>Disclaimer
+                        </a>
+                        <span class="mx-2"></span>
+                        <a href="{{ url_for('privacy') }}" class="text-light text-decoration-none">
+                            <i class="fas fa-user-shield me-1"></i>Privacy Policy
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification Floating Container -->
+    <div id="notificationFloating" class="notification-floating" style="display: none;">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white py-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Notifications
+                    </h6>
+                    <button class="btn btn-sm btn-outline-light" onclick="closeNotifications()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                <div id="notificationContent">
+                    <div class="text-center py-3">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <div class="small text-muted mt-2">Loading notifications...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-light py-2">
+                <div class="text-center">
+                    <a href="{{ url_for('user_notifications') }}" class="btn btn-sm btn-primary">
+                        View All Notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Notification System -->
+    <script>
+    let notificationFloating = null;
+
+    function toggleNotifications() {
+        const container = document.getElementById('notificationFloating');
+
+        if (container.style.display === 'none') {
+            loadNotifications();
+            container.style.display = 'block';
+            setTimeout(() => container.classList.add('show'), 10);
+        } else {
+            closeNotifications();
+        }
+    }
+
+    function closeNotifications() {
+        const container = document.getElementById('notificationFloating');
+        container.classList.remove('show');
+        setTimeout(() => container.style.display = 'none', 300);
+    }
+
+    function loadNotifications() {
+        fetch('/api/notifications')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateNotificationContent(data.notifications);
+                    updateNotificationBadge(data.unread_count);
+                }
+            })
+            .catch(error => {
+                document.getElementById('notificationContent').innerHTML = `
+                    <div class="text-center py-3 text-muted">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div class="small">Failed to load notifications</div>
+                    </div>
+                `;
+            });
+    }
+
+    function updateNotificationContent(notifications) {
+        const content = document.getElementById('notificationContent');
+
+        if (notifications.length === 0) {
+            content.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-bell-slash fa-2x mb-2"></i>
+                    <div>No new notifications</div>
+                </div>
+            `;
+            return;
+        }
+
+        content.innerHTML = notifications.map(notification => `
+            <div class="notification-item border-bottom p-3" data-notification-id="${notification.id}">
+                <div class="d-flex align-items-start">
+                    <div class="notification-icon bg-${notification.type} bg-opacity-10 rounded-circle me-3 flex-shrink-0" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas ${notification.icon} text-${notification.type}"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1 small fw-bold">${notification.title}</h6>
+                        <p class="mb-1 small text-muted">${notification.message}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">${formatNotificationTime(notification.created_at)}</small>
+                            <button class="btn btn-sm btn-outline-primary" onclick="markNotificationRead(${notification.id})">
+                                <i class="fas fa-check"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateNotificationBadge(count) {
+        const badge = document.getElementById('notificationBadge');
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+
+    function markNotificationRead(notificationId) {
+        fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const item = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                if (item) {
+                    item.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        item.remove();
+                        // Reload notifications
+                        loadNotifications();
+                    }, 300);
+                }
+            }
+        });
+    }
+
+    function formatNotificationTime(isoString) {
+        const date = new Date(isoString);
+        const now = new Date();
+        const diff = now - date;
+
+        if (diff < 60000) return 'Just now';
+        if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+        if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+        return date.toLocaleDateString();
+    }
+
+    // Auto-check for new notifications every 30 seconds
+    setInterval(() => {
+        if (document.getElementById('notificationFloating').style.display === 'none') {
+            fetch('/api/notifications')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateNotificationBadge(data.unread_count);
+                    }
+                })
+                .catch(() => {});
+        }
+    }, 30000);
+
+    // Load initial notification count
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if get_current_user() %}
+        loadNotifications();
+        {% endif %}
+    });
+    </script>
+
+    <style>
+    .notification-floating {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 350px;
+        animation: slideInRight 0.3s ease-out;
+    }
+
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100%); }
+    }
+
+    .notification-bell {
+        position: relative;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .notification-bell:hover {
+        background: rgba(255,255,255,0.1);
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+    }
+
+    .notification-item {
+        transition: all 0.3s ease;
+    }
+
+    .notification-item:hover {
+        background-color: rgba(0,0,0,0.02);
+    }
+    </style>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

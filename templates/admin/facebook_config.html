@@ -1,0 +1,342 @@
+
+{% extends "base.html" %}
+
+{% block title %}Facebook Configuration - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fab fa-facebook me-2"></i>Facebook Login Configuration
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('admin_facebook_config') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="app_id" class="form-label">
+                                        <i class="fas fa-key me-1"></i>Facebook App ID
+                                    </label>
+                                    <input type="text" class="form-control" id="app_id" name="app_id" 
+                                           value="{{ config.app_id }}" required>
+                                    <div class="form-text">Enter Facebook App ID from Developer Console</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="app_secret" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Facebook App Secret
+                                    </label>
+                                    <input type="password" class="form-control" id="app_secret" name="app_secret" 
+                                           value="{{ config.app_secret }}" required>
+                                    <div class="form-text">Enter Facebook App Secret Key</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_enabled" name="is_enabled" 
+                                       {{ 'checked' if config.is_enabled else '' }}>
+                                <label class="form-check-label" for="is_enabled">
+                                    <strong>Enable Facebook Login</strong>
+                                </label>
+                            </div>
+                            <div class="form-text">Check to enable Facebook login feature</div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="testConnection()">
+                                <i class="fas fa-plug me-1"></i>Test Connection
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Facebook App Setup Guide -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs me-2"></i>Facebook App Setup Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-plus-circle text-success"></i> Quick Setup</h6>
+                            <p class="small text-muted">Create and configure Facebook app automatically</p>
+                            <button class="btn btn-success btn-sm w-100" onclick="quickSetup()">
+                                <i class="fas fa-magic me-1"></i>Auto Setup Facebook App
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-sync text-info"></i> Sync Settings</h6>
+                            <p class="small text-muted">Synchronize with Facebook Developer Console</p>
+                            <button class="btn btn-info btn-sm w-100" onclick="syncSettings()">
+                                <i class="fas fa-sync me-1"></i>Sync with Facebook
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Current Status -->
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Configuration Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Required URLs for Facebook App:</h6>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">App Domain:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="{{ request.host }}" readonly>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('{{ request.host }}')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Privacy Policy URL:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="{{ request.url_root }}privacy" readonly>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('{{ request.url_root }}privacy')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Terms of Service URL:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="{{ request.url_root }}disclaimer" readonly>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('{{ request.url_root }}disclaimer')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Data Deletion URL:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="{{ request.url_root }}data-deletion" readonly>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('{{ request.url_root }}data-deletion')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Valid OAuth Redirect URI:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="{{ request.url_root }}auth/facebook_callback" readonly>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyToClipboard('{{ request.url_root }}auth/facebook_callback')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr>
+                    
+                    <h6>Configuration Status:</h6>
+                    <ul class="list-unstyled">
+                        <li>
+                            <i class="fas fa-{{ 'check text-success' if config.app_id else 'times text-danger' }}"></i>
+                            App ID: {{ 'Available' if config.app_id else 'Not Set' }}
+                        </li>
+                        <li>
+                            <i class="fas fa-{{ 'check text-success' if config.app_secret else 'times text-danger' }}"></i>
+                            App Secret: {{ 'Available' if config.app_secret else 'Not Set' }}
+                        </li>
+                        <li>
+                            <i class="fas fa-{{ 'check text-success' if config.is_enabled else 'times text-warning' }}"></i>
+                            Status: {{ 'Active' if config.is_enabled else 'Inactive' }}
+                        </li>
+                    </ul>
+
+                    {% if config.updated_at %}
+                    <small class="text-muted">
+                        Last updated: {{ config.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Setup Guide -->
+            <div class="card shadow mt-3">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Setup Guide
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="setupAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1">
+                                    Step 1: Create Facebook App
+                                </button>
+                            </h2>
+                            <div id="step1" class="accordion-collapse collapse show" data-bs-parent="#setupAccordion">
+                                <div class="accordion-body small">
+                                    <ol>
+                                        <li>Go to <a href="https://developers.facebook.com" target="_blank">Facebook Developers</a></li>
+                                        <li>Click "Create App"</li>
+                                        <li>Select "Consumer" > Continue</li>
+                                        <li>Enter App Name and Contact Email</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step2">
+                                    Step 2: Configure Settings
+                                </button>
+                            </h2>
+                            <div id="step2" class="accordion-collapse collapse" data-bs-parent="#setupAccordion">
+                                <div class="accordion-body small">
+                                    <ol>
+                                        <li>Add "Facebook Login" product</li>
+                                        <li>Set App Domains: <code>{{ request.host }}</code></li>
+                                        <li>Add OAuth Redirect URI</li>
+                                        <li>Copy App ID and Secret to this form</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step3">
+                                    Step 3: Testing
+                                </button>
+                            </h2>
+                            <div id="step3" class="accordion-collapse collapse" data-bs-parent="#setupAccordion">
+                                <div class="accordion-body small">
+                                    <ol>
+                                        <li>Add test users in App > Roles</li>
+                                        <li>Test login with test accounts</li>
+                                        <li>Submit for review if needed</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        showToast('URL copied to clipboard!', 'success');
+    });
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification alert alert-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:10px 20px;border-radius:5px;z-index:9999;';
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        document.body.removeChild(toast);
+    }, 3000);
+}
+
+function testConnection() {
+    const appId = document.getElementById('app_id').value;
+    const appSecret = document.getElementById('app_secret').value;
+    
+    if (!appId || !appSecret) {
+        alert('Please fill in App ID and App Secret first');
+        return;
+    }
+    
+    fetch('/admin/test-facebook-config', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            app_id: appId,
+            app_secret: appSecret
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Connection successful! Facebook configuration is valid.', 'success');
+        } else {
+            showToast('Connection failed: ' + data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error occurred during connection test', 'danger');
+    });
+}
+
+function quickSetup() {
+    showToast('Opening Facebook Developers Console...', 'info');
+    window.open('https://developers.facebook.com/apps/', '_blank');
+}
+
+function syncSettings() {
+    fetch('/admin/sync-facebook-settings', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Settings synchronized successfully!', 'success');
+            location.reload();
+        } else {
+            showToast('Sync failed: ' + data.message, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error occurred during sync', 'danger');
+    });
+}
+</script>
+{% endblock %}

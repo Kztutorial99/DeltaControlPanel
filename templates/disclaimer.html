@@ -1,0 +1,58 @@
+
+{% extends "base.html" %}
+
+{% block title %}Disclaimer - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-exclamation-circle me-2"></i>Disclaimer
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="disclaimer-content">
+                        <h4>Penafian Umum</h4>
+                        <p>Informasi yang disediakan platform DeltaPro ini bersifat umum dan hanya untuk tujuan informasi. Mohon gunakan dengan bijak dan bertanggung jawab.</p>
+                        
+                        <h4>Tanggung Jawab Pengguna</h4>
+                        <p>Penggunaan layanan sepenuhnya menjadi tanggung jawab pengguna. Kami tidak bertanggung jawab atas tindakan yang mungkin timbul dari penggunaan layanan ini.</p>
+                        
+                        <h4>Batasan Layanan</h4>
+                        <ul>
+                            <li>Platform ini hanya menyediakan layanan OTP untuk keperluan yang sah</li>
+                            <li>Penggunaan untuk aktivitas ilegal atau merugikan pihak lain dilarang keras</li>
+                            <li>Kami berhak membatasi atau menghentikan layanan tanpa pemberitahuan sebelumnya</li>
+                        </ul>
+                        
+                        <h4>Ketersediaan Layanan</h4>
+                        <p>Kami berusaha memberikan layanan yang stabil, namun tidak dapat menjamin ketersediaan layanan 100% tanpa gangguan. Pemeliharaan sistem dapat dilakukan sewaktu-waktu.</p>
+                        
+                        <h4>Perubahan Ketentuan</h4>
+                        <p>Disclaimer ini dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya. Pengguna disarankan untuk memeriksa halaman ini secara berkala.</p>
+                        
+                        <div class="alert alert-warning mt-4">
+                            <h5><i class="fas fa-warning me-2"></i>Peringatan Penting</h5>
+                            <p class="mb-0">Dengan menggunakan layanan DeltaPro, Anda dianggap telah membaca, memahami, dan menyetujui seluruh isi disclaimer ini.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <small class="text-muted">
+                        Terakhir diperbarui: 30 Mei 2025
+                    </small>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

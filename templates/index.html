@@ -1,0 +1,459 @@
+
+{% extends "base.html" %}
+
+{% block title %}DeltaPro - Professional OTP Service Management{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Enhanced Animation -->
+<div class="hero-section py-5 fade-in-up">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="hero-content slide-in-left">
+                    <div class="badge bg-gradient-primary text-white mb-3 pulse-animation">
+                        <i class="fas fa-star me-1"></i>Professional OTP Platform
+                    </div>
+                    <h1 class="display-4 fw-bold mb-3 text-white">
+                        <span class="text-warning glow-text">DeltaPro</span><br>
+                        <span class="text-white">OTP Service Management</span>
+                    </h1>
+                    <p class="lead mb-4 text-white-75">
+                        Advanced OTP service management platform with premium features, comprehensive admin panel, and enterprise-grade security measures.
+                    </p>
+                    <div class="feature-list mb-4">
+                        <div class="feature-item d-flex align-items-center mb-3 fade-in-item" data-delay="0.1s">
+                            <div class="feature-icon-bg me-3">
+                                <i class="fas fa-shield-alt text-success"></i>
+                            </div>
+                            <span class="text-white fw-medium">Enterprise Security</span>
+                        </div>
+                        <div class="feature-item d-flex align-items-center mb-3 fade-in-item" data-delay="0.2s">
+                            <div class="feature-icon-bg me-3">
+                                <i class="fas fa-mobile-alt text-primary"></i>
+                            </div>
+                            <span class="text-white fw-medium">Multiple OTP Providers</span>
+                        </div>
+                        <div class="feature-item d-flex align-items-center mb-3 fade-in-item" data-delay="0.3s">
+                            <div class="feature-icon-bg me-3">
+                                <i class="fas fa-crown text-warning"></i>
+                            </div>
+                            <span class="text-white fw-medium">Premium Subscriptions</span>
+                        </div>
+                        <div class="feature-item d-flex align-items-center mb-3 fade-in-item" data-delay="0.4s">
+                            <div class="feature-icon-bg me-3">
+                                <i class="fas fa-chart-line text-info"></i>
+                            </div>
+                            <span class="text-white fw-medium">Real-time Analytics</span>
+                        </div>
+                    </div>
+                    <div class="cta-buttons d-flex flex-column flex-sm-row gap-3">
+                        <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg shadow-lg hover-lift text-dark fw-bold">
+                            <i class="fas fa-sign-in-alt me-2"></i>Access Platform
+                        </a>
+                        <a href="#features" class="btn btn-light btn-lg hover-lift smooth-scroll text-primary fw-bold">
+                            <i class="fas fa-info-circle me-2"></i>Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-4 slide-in-right">
+                    <!-- Free Plan Card -->
+                    <div class="col-12">
+                        <div class="plan-card bg-white rounded-4 p-4 shadow-sm border-2 border-light hover-lift-smooth fade-in-item" data-delay="0.1s">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="plan-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-rocket text-primary fa-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold text-dark mb-1">Free Plan</h5>
+                                        <p class="text-muted mb-0 small">Perfect for getting started</p>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <div class="h4 fw-bold text-primary mb-0">FREE</div>
+                                    <small class="text-secondary">Forever</small>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="feature-highlight bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded-3 p-2 text-center">
+                                        <i class="fas fa-mobile-alt text-primary mb-1"></i>
+                                        <div class="small fw-bold text-dark">3 Providers</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="feature-highlight bg-success bg-opacity-10 border border-success border-opacity-25 rounded-3 p-2 text-center">
+                                        <i class="fas fa-clock text-success mb-1"></i>
+                                        <div class="small fw-bold text-dark">10/day</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-primary w-100 text-dark fw-bold rounded-pill">
+                                <i class="fas fa-play me-2"></i>Get Started Free
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Premium Plan Card -->
+                    <div class="col-12">
+                        <div class="plan-card bg-gradient-premium text-white rounded-4 p-4 shadow-lg hover-lift-smooth position-relative fade-in-item" data-delay="0.2s" style="padding-top: 3.5rem !important;">
+                            <!-- Most Popular Badge -->
+                            <div class="position-absolute top-0 start-50 translate-middle-x" style="z-index: 10; margin-top: -8px;">
+                                <span class="badge bg-warning text-dark px-4 py-2 rounded-pill fw-bold shadow-sm" style="font-size: 0.75rem; border: 2px solid rgba(255,255,255,0.3);">
+                                    <i class="fas fa-star me-1"></i>MOST POPULAR
+                                </span>
+                            </div>
+                            
+                            <div class="d-flex align-items-center justify-content-between mb-3" style="margin-top: 0.5rem;">
+                                <div class="d-flex align-items-center">
+                                    <div class="plan-icon bg-white bg-opacity-20 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-crown text-warning fa-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold text-white mb-1">Premium Plan</h5>
+                                        <p class="text-white-75 mb-0 small">For professionals</p>
+                                    </div>
+                                </div>
+                                <div class="text-end" style="margin-right: 0.5rem;">
+                                    <div class="d-flex flex-column align-items-end justify-content-center">
+                                        <div class="h2 fw-bold text-warning mb-0 lh-1" style="text-shadow: 0 2px 4px rgba(0,0,0,0.4); font-size: 2.2rem;">Rp 50K</div>
+                                        <small class="text-white fw-medium" style="font-size: 0.9rem; opacity: 0.9;">per month</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="feature-highlight bg-white bg-opacity-25 border border-white border-opacity-50 rounded-3 p-2 text-center">
+                                        <i class="fas fa-infinity text-warning mb-1 fw-bold"></i>
+                                        <div class="small fw-bold text-white">Unlimited</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="feature-highlight bg-white bg-opacity-25 border border-white border-opacity-50 rounded-3 p-2 text-center">
+                                        <i class="fas fa-shield-alt text-warning mb-1 fw-bold"></i>
+                                        <div class="small fw-bold text-white">Enhanced</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{{ url_for('premium') }}" class="btn btn-warning w-100 text-dark fw-bold rounded-pill">
+                                <i class="fas fa-crown me-2"></i>Upgrade Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+</div>
+
+<!-- Features Section with Better Contrast -->
+<section id="features" class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5 fade-in-up">
+            <h2 class="fw-bold text-dark mb-3">Platform Features</h2>
+            <p class="lead text-secondary">Everything you need for professional OTP service management</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card bg-white border-0 rounded-3 p-4 h-100 text-center shadow-sm hover-lift fade-in-item" data-delay="0s">
+                    <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-mobile-alt fa-2x text-primary"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3">Multiple Providers</h5>
+                    <p class="text-secondary mb-0">Tokopedia, KlikDokter, Alodokter, Bukalapak, Shopee, Gojek, Grab, Traveloka</p>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card bg-white border-0 rounded-3 p-4 h-100 text-center shadow-sm hover-lift fade-in-item" data-delay="0.1s">
+                    <div class="feature-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-crown fa-2x text-success"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3">Premium Plans</h5>
+                    <p class="text-secondary mb-0">Advanced features, priority support, and exclusive provider access</p>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card bg-white border-0 rounded-3 p-4 h-100 text-center shadow-sm hover-lift fade-in-item" data-delay="0.2s">
+                    <div class="feature-icon bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-shield-alt fa-2x text-warning"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3">Enterprise Security</h5>
+                    <p class="text-secondary mb-0">Rate limiting, device binding, audit logging, and anti-abuse measures</p>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card bg-white border-0 rounded-3 p-4 h-100 text-center shadow-sm hover-lift fade-in-item" data-delay="0.3s">
+                    <div class="feature-icon bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="fas fa-chart-line fa-2x text-info"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-3">Analytics & Monitoring</h5>
+                    <p class="text-secondary mb-0">Real-time monitoring, success rates, and comprehensive reporting</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Comparison Section -->
+<section id="plans" class="py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5 fade-in-up">
+            <h2 class="fw-bold text-dark mb-3">Plan Comparison</h2>
+            <p class="lead text-secondary">Compare features between Free and Premium plans</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="comparison-table bg-white rounded-4 shadow-sm p-4 border">
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                                <tr class="border-bottom">
+                                    <th class="text-secondary">Features</th>
+                                    <th class="text-center text-secondary">Free Plan</th>
+                                    <th class="text-center text-warning fw-bold">Premium Plan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-medium">OTP Providers</td>
+                                    <td class="text-center">3 Basic Providers</td>
+                                    <td class="text-center text-success fw-bold">All 8 Providers</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">Daily Requests</td>
+                                    <td class="text-center">10 requests/day</td>
+                                    <td class="text-center text-success fw-bold">Unlimited</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">Support</td>
+                                    <td class="text-center">Email Support</td>
+                                    <td class="text-center text-success fw-bold">Priority Support</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">Security</td>
+                                    <td class="text-center">Standard Security</td>
+                                    <td class="text-center text-success fw-bold">Enhanced + Device Binding</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-medium">API Access</td>
+                                    <td class="text-center">Basic API</td>
+                                    <td class="text-center text-success fw-bold">Advanced API</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Security Section with Smooth Rounded Background -->
+<section class="py-5 position-relative overflow-hidden">
+    <div class="security-background"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="fade-in-up">
+                    <div class="security-badge mb-3">
+                        <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                            <i class="fas fa-shield-alt me-2"></i>Enterprise Security
+                        </span>
+                    </div>
+                    <h2 class="fw-bold mb-3 text-white">Enterprise-Grade Security</h2>
+                    <p class="lead mb-4 text-white-75">Your data and operations are protected by advanced security measures designed for enterprise environments.</p>
+                    <div class="security-features">
+                        <div class="security-feature-card bg-white bg-opacity-10 backdrop-blur rounded-4 p-4 mb-3 fade-in-item" data-delay="0.1s">
+                            <div class="d-flex align-items-start">
+                                <div class="security-icon bg-warning bg-opacity-90 rounded-3 d-inline-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-lock text-dark fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-2 text-white fw-bold">SSL/TLS Encryption</h6>
+                                    <p class="text-white-75 mb-0 small">End-to-end encryption for all communications with industry-standard protocols</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="security-feature-card bg-white bg-opacity-10 backdrop-blur rounded-4 p-4 mb-3 fade-in-item" data-delay="0.2s">
+                            <div class="d-flex align-items-start">
+                                <div class="security-icon bg-success bg-opacity-90 rounded-3 d-inline-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-shield-alt text-white fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-2 text-white fw-bold">Rate Limiting & IP Monitoring</h6>
+                                    <p class="text-white-75 mb-0 small">Advanced protection against abuse and attacks with real-time monitoring</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="security-feature-card bg-white bg-opacity-10 backdrop-blur rounded-4 p-4 fade-in-item" data-delay="0.3s">
+                            <div class="d-flex align-items-start">
+                                <div class="security-icon bg-info bg-opacity-90 rounded-3 d-inline-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-eye text-white fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-2 text-white fw-bold">Comprehensive Audit Logging</h6>
+                                    <p class="text-white-75 mb-0 small">Complete activity tracking and forensic capabilities for maximum transparency</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="security-visual-enhanced pulse-slow">
+                    <div class="security-shield-enhanced bg-gradient-primary rounded-circle d-inline-flex align-items-center justify-content-center shadow-lg position-relative" style="width: 140px; height: 140px;">
+                        <i class="fas fa-shield-alt fa-4x text-white"></i>
+                        <div class="security-pulse"></div>
+                    </div>
+                    <div class="security-rings">
+                        <div class="ring ring-1"></div>
+                        <div class="ring ring-2"></div>
+                        <div class="ring ring-3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Enhanced animations and interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Intersection Observer for scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate');
+                
+                // Handle delayed animations for grouped items
+                const delay = entry.target.dataset.delay || '0s';
+                entry.target.style.animationDelay = delay;
+            }
+        });
+    }, observerOptions);
+
+    // Observe all animation elements
+    document.querySelectorAll('.fade-in-up, .fade-in-item, .slide-in-left, .slide-in-right').forEach(el => {
+        observer.observe(el);
+    });
+
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('.smooth-scroll').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId && targetId !== '#' && targetId.length > 1 && targetId.startsWith('#')) {
+                try {
+                    // Validate selector before using it
+                    if (targetId.match(/^#[a-zA-Z][\w\-]*$/)) {
+                        const target = document.querySelector(targetId);
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Invalid selector:', targetId);
+                }
+            }
+        });
+    });
+
+    // Enhanced hover effects for interactive elements
+    document.querySelectorAll('.hover-lift').forEach(element => {
+        element.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+        });
+        
+        element.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Enhanced plan card interactions
+    const planCards = document.querySelectorAll('.plan-selection-card');
+    
+    planCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = this.classList.contains('transform-scale') 
+                ? 'scale(1.07) translateY(-10px)' 
+                : 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = this.classList.contains('transform-scale') 
+                ? 'scale(1.05)' 
+                : 'translateY(0) scale(1)';
+        });
+    });
+
+    // Smooth scroll to plans section when coming from other pages
+    if (window.location.hash === '#plans') {
+        const plansSection = document.getElementById('plans');
+        if (plansSection) {
+            plansSection.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+
+    // Metric cards counter animation
+    function animateCounters() {
+        const counters = document.querySelectorAll('.metric-card .h4');
+        counters.forEach(counter => {
+            const target = counter.textContent;
+            const isPercentage = target.includes('%');
+            const isPlus = target.includes('+');
+            const num = parseInt(target.replace(/[^\d]/g, ''));
+            
+            if (!isNaN(num)) {
+                let current = 0;
+                const increment = num / 50;
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= num) {
+                        current = num;
+                        clearInterval(timer);
+                    }
+                    
+                    let display = Math.floor(current).toString();
+                    if (isPercentage) display += '%';
+                    if (isPlus && current >= num) display += '+';
+                    if (target.includes('K')) display = (current / 1000).toFixed(1) + 'K+';
+                    
+                    counter.textContent = display;
+                }, 50);
+            }
+        });
+    }
+
+    // Trigger counter animation when metrics come into view
+    const metricsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animateCounters();
+                metricsObserver.unobserve(entry.target);
+            }
+        });
+    });
+
+    const metricsSection = document.querySelector('.dashboard-preview');
+    if (metricsSection) {
+        metricsObserver.observe(metricsSection);
+    }
+});
+</script>
+{% endblock %}

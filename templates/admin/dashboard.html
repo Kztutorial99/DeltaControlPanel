@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Admin Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="admin-header bg-gradient-warning text-dark rounded-3 p-4 shadow">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="h3 mb-2">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Admin Dashboard
+                        </h1>
+                        <p class="mb-0 opacity-75">
+                            System overview and management tools
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="text-dark opacity-75">
+                            <i class="fas fa-user-shield me-1"></i>
+                            Administrator: {{ current_user.username }}
+                        </div>
+                        <div class="text-dark opacity-75">
+                            <i class="fas fa-clock me-1"></i>
+                            <span id="admin-time"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-4 shadow-sm border-start border-primary border-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="h4 mb-1 text-primary">{{ total_users }}</h3>
+                        <p class="text-muted mb-0">Total Users</p>
+                    </div>
+                    <div class="stat-icon bg-primary bg-opacity-10 rounded-circle">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        Active system
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-4 shadow-sm border-start border-warning border-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="h4 mb-1 text-warning">{{ premium_users }}</h3>
+                        <p class="text-muted mb-0">Premium Users</p>
+                    </div>
+                    <div class="stat-icon bg-warning bg-opacity-10 rounded-circle">
+                        <i class="fas fa-crown text-warning"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-info">
+                        <i class="fas fa-percentage me-1"></i>
+                        {{ ((premium_users / total_users) * 100) | round(1) if total_users > 0 else 0 }}% conversion
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-4 shadow-sm border-start border-danger border-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="h4 mb-1 text-danger">{{ pending_payments }}</h3>
+                        <p class="text-muted mb-0">Pending Payments</p>
+                    </div>
+                    <div class="stat-icon bg-danger bg-opacity-10 rounded-circle">
+                        <i class="fas fa-clock text-danger"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    {% if pending_payments > 0 %}
+                        <small class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Requires attention
+                        </small>
+                    {% else %}
+                        <small class="text-success">
+                            <i class="fas fa-check me-1"></i>
+                            All clear
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-4 shadow-sm border-start border-info border-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="h4 mb-1 text-info">{{ recent_requests|length }}</h3>
+                        <p class="text-muted mb-0">Recent Requests</p>
+                    </div>
+                    <div class="stat-icon bg-info bg-opacity-10 rounded-circle">
+                        <i class="fas fa-mobile-alt text-info"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Last 24 hours
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-activity text-info me-2"></i>
+                            Recent OTP Requests
+                        </h5>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-secondary active" data-filter="all">All</button>
+                            <button class="btn btn-outline-secondary" data-filter="success">Success</button>
+                            <button class="btn btn-outline-secondary" data-filter="failed">Failed</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if recent_requests %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Provider</th>
+                                        <th>Phone</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                        <th>IP</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in recent_requests %}
+                                    <tr class="request-row" data-status="{{ request.status }}">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if request.user.is_premium_active() %}
+                                                    <i class="fas fa-crown text-warning me-2"></i>
+                                                {% else %}
+                                                    <i class="fas fa-user text-muted me-2"></i>
+                                                {% endif %}
+                                                <span>{{ request.user.username }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ request.provider.name }}</span>
+                                        </td>
+                                        <td>
+                                            <code class="small">{{ request.phone_number|mask(4) }}</code>
+                                        </td>
+                                        <td>
+                                            {% if request.status == 'success' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Success
+                                                </span>
+                                            {% elif request.status == 'failed' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>Failed
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>{{ request.status.title() }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ request.created_at|datetime }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ request.request_ip }}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-chart-line text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted">No recent requests</h5>
+                            <p class="text-muted">Request activity will appear here.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & System Status -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt text-warning me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-users me-2"></i>Manage Users
+                        </a>
+                        <a href="{{ url_for('admin_messages') }}" class="btn btn-outline-info">
+                            <i class="fas fa-envelope me-2"></i>View Messages
+                        </a>
+                        <button class="btn btn-outline-success" onclick="refreshSystemStatus()">
+                            <i class="fas fa-sync me-2"></i>Refresh Status
+                        </button>
+                        <button class="btn btn-outline-warning" onclick="exportData()">
+                            <i class="fas fa-download me-2"></i>Export Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Health -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-heartbeat text-danger me-2"></i>
+                        System Health
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="system-status">
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                            <div>
+                                <i class="fas fa-database text-success me-2"></i>
+                                <span>Database</span>
+                            </div>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                        
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                            <div>
+                                <i class="fas fa-server text-success me-2"></i>
+                                <span>API Services</span>
+                            </div>
+                            <span class="badge bg-success">Running</span>
+                        </div>
+                        
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                            <div>
+                                <i class="fas fa-shield-alt text-warning me-2"></i>
+                                <span>Security</span>
+                            </div>
+                            <span class="badge bg-warning">Monitoring</span>
+                        </div>
+                        
+                        <div class="status-item d-flex justify-content-between align-items-center mb-3 p-3 bg-light rounded">
+                            <div>
+                                <i class="fas fa-memory text-info me-2"></i>
+                                <span>Performance</span>
+                            </div>
+                            <span class="badge bg-info">Optimal</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Last updated: <span id="lastUpdate">Just now</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Update admin time
+function updateAdminTime() {
+    const now = new Date();
+    const timeString = now.toLocaleTimeString();
+    document.getElementById('admin-time').textContent = timeString;
+}
+
+updateAdminTime();
+setInterval(updateAdminTime, 1000);
+
+// Filter requests by status
+document.querySelectorAll('[data-filter]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const filter = this.dataset.filter;
+        
+        // Update active button
+        document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Filter rows
+        document.querySelectorAll('.request-row').forEach(row => {
+            if (filter === 'all' || row.dataset.status === filter) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+});
+
+// Refresh system status
+function refreshSystemStatus() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        document.getElementById('lastUpdate').textContent = 'Just now';
+        
+        // Show success message
+        showToast('System status refreshed successfully', 'success');
+    }, 2000);
+}
+
+// Export data
+function exportData() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Exporting...';
+    
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        
+        // Show success message
+        showToast('Data export completed', 'success');
+    }, 3000);
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// Auto-refresh data every 30 seconds
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        window.location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}

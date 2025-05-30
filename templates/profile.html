@@ -1,0 +1,497 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Settings - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="profile-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-user-cog me-2"></i>Profile Settings
+            </h1>
+            <p class="text-muted mb-0">Manage your account settings and preferences</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="account-status">
+                {% if user.is_premium %}
+                <span class="badge bg-warning text-dark me-2">
+                    <i class="fas fa-crown me-1"></i>PREMIUM
+                </span>
+                {% endif %}
+                <span class="badge bg-success">
+                    <i class="fas fa-shield-alt me-1"></i>SECURE
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column - Profile Info -->
+    <div class="col-lg-4">
+        <div class="card profile-card">
+            <div class="card-body text-center">
+                <div class="profile-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h5 class="mt-3">{{ user.username }}</h5>
+                <p class="text-muted">{{ user.email }}</p>
+                
+                <div class="profile-stats">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stat-value">{{ user.otp_requests|length }}</div>
+                            <div class="stat-label">Requests</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-value">
+                                {% if user.last_login %}
+                                {{ (user.last_login.now() - user.last_login).days }}d
+                                {% else %}
+                                --
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Last Login</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat-value">{{ (user.created_at.now() - user.created_at).days }}d</div>
+                            <div class="stat-label">Member</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    {% if not user.is_premium %}
+                    <a href="{{ url_for('premium') }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-crown me-2"></i>Upgrade to Premium
+                    </a>
+                    {% else %}
+                    <span class="text-success">
+                        <i class="fas fa-check-circle me-1"></i>Premium Active
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Summary -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Account Summary
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="summary-item">
+                    <label>Current Balance:</label>
+                    <div class="value text-success">Rp {{ "{:,.0f}".format(user.balance) }}</div>
+                </div>
+                
+                <div class="summary-item">
+                    <label>Account Type:</label>
+                    <div class="value">
+                        {% if user.is_premium %}
+                        <span class="badge bg-warning text-dark">Premium</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Free</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if user.is_premium and user.subscription_expiry %}
+                <div class="summary-item">
+                    <label>Subscription Expires:</label>
+                    <div class="value">{{ user.subscription_expiry.strftime('%d %B %Y') }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="summary-item">
+                    <label>Member Since:</label>
+                    <div class="value">{{ user.created_at.strftime('%B %Y') }}</div>
+                </div>
+                
+                <div class="summary-item">
+                    <label>Account Status:</label>
+                    <div class="value">
+                        {% if user.is_active %}
+                        <span class="badge bg-success">Active</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column - Settings -->
+    <div class="col-lg-8">
+        <!-- API Key Management -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-key me-2"></i>API Key Management
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Your API key is used to authenticate requests to our API endpoints.</p>
+                
+                <div class="api-key-section">
+                    <label class="form-label">Current API Key:</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control font-monospace" 
+                               value="{{ user.api_key }}" id="apiKeyField" readonly>
+                        <button class="btn btn-outline-secondary" type="button" id="toggleApiKey">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-primary" type="button" onclick="copyApiKey()">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <form method="POST" action="{{ url_for('regenerate_api_key') }}" 
+                          onsubmit="return confirmApiKeyRegeneration()">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-sync-alt me-2"></i>Regenerate API Key
+                        </button>
+                    </form>
+                    <small class="form-text text-danger">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Warning: Regenerating will invalidate your current API key
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Settings -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>Security Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6><i class="fas fa-mobile-alt text-primary me-2"></i>Device Binding</h6>
+                            <p class="text-muted small">
+                                {% if user.is_premium %}
+                                <span class="text-success">
+                                    <i class="fas fa-check-circle me-1"></i>Enabled (Premium Feature)
+                                </span>
+                                <br>Your account is bound to this device for enhanced security.
+                                {% else %}
+                                <span class="text-muted">
+                                    <i class="fas fa-times-circle me-1"></i>Not Available
+                                </span>
+                                <br>Upgrade to Premium to enable device binding security.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6><i class="fas fa-globe text-info me-2"></i>Current IP Address</h6>
+                            <p class="text-muted small">
+                                <code>{{ user.ip_address or 'Unknown' }}</code>
+                                <br>Last updated: {{ user.last_login.strftime('%d/%m/%Y %H:%M') if user.last_login else 'Never' }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6><i class="fas fa-history text-warning me-2"></i>Session Management</h6>
+                            <p class="text-muted small">
+                                Sessions expire after 24 hours of inactivity.
+                                <br>Premium users get extended session duration.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="security-item">
+                            <h6><i class="fas fa-lock text-success me-2"></i>Data Encryption</h6>
+                            <p class="text-muted small">
+                                All data transmission uses SSL/TLS encryption.
+                                <br>API keys and passwords are securely hashed.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usage Statistics -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Usage Statistics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-6">
+                        <div class="usage-stat">
+                            <div class="stat-icon bg-primary">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>{{ user.otp_requests|length }}</h4>
+                                <p>Total Requests</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-6">
+                        <div class="usage-stat">
+                            <div class="stat-icon bg-success">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>{{ user.otp_requests|selectattr('status', 'equalto', 'success')|list|length }}</h4>
+                                <p>Successful</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-6">
+                        <div class="usage-stat">
+                            <div class="stat-icon bg-warning">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>Rp {{ "{:,.0f}".format(user.otp_requests|map(attribute='cost')|sum) }}</h4>
+                                <p>Total Spent</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-6">
+                        <div class="usage-stat">
+                            <div class="stat-icon bg-info">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h4>
+                                    {% set total_requests = user.otp_requests|length %}
+                                    {% set successful_requests = user.otp_requests|selectattr('status', 'equalto', 'success')|list|length %}
+                                    {% if total_requests > 0 %}
+                                    {{ ((successful_requests / total_requests) * 100)|round(1) }}%
+                                    {% else %}
+                                    0%
+                                    {% endif %}
+                                </h4>
+                                <p>Success Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Account Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>Account Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="action-grid">
+                    <div class="action-item">
+                        <div class="action-icon bg-primary">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="action-content">
+                            <h6>Export Data</h6>
+                            <p class="text-muted small">Download your account data and usage history</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="exportData()">
+                                <i class="fas fa-download me-1"></i>Export
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-item">
+                        <div class="action-icon bg-warning">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="action-content">
+                            <h6>Contact Support</h6>
+                            <p class="text-muted small">Get help from our support team</p>
+                            <a href="{{ url_for('messages') }}" class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-envelope me-1"></i>Message
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="action-item">
+                        <div class="action-icon bg-info">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div class="action-content">
+                            <h6>Notifications</h6>
+                            <p class="text-muted small">Manage your notification preferences</p>
+                            <button class="btn btn-outline-info btn-sm" onclick="manageNotifications()">
+                                <i class="fas fa-cog me-1"></i>Settings
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="action-item">
+                        <div class="action-icon bg-danger">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <div class="action-content">
+                            <h6>Delete Account</h6>
+                            <p class="text-muted small">Permanently delete your account and data</p>
+                            <button class="btn btn-outline-danger btn-sm" onclick="deleteAccount()">
+                                <i class="fas fa-trash-alt me-1"></i>Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function confirmApiKeyRegeneration() {
+    return confirm(
+        'Are you sure you want to regenerate your API key?\n\n' +
+        'This action will:\n' +
+        '• Invalidate your current API key\n' +
+        '• Generate a new API key\n' +
+        '• Require updating any existing integrations\n\n' +
+        'This action cannot be undone.'
+    );
+}
+
+function copyApiKey() {
+    const apiKeyField = document.getElementById('apiKeyField');
+    const currentType = apiKeyField.type;
+    
+    // Temporarily show the key to copy it
+    apiKeyField.type = 'text';
+    apiKeyField.select();
+    apiKeyField.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        
+        // Show success feedback
+        const button = event.target.closest('button');
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check text-success"></i>';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+        
+        // Show toast notification
+        showToast('API key copied to clipboard!', 'success');
+        
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        showToast('Failed to copy API key', 'error');
+    }
+    
+    // Restore original type
+    apiKeyField.type = currentType;
+}
+
+function exportData() {
+    if (confirm('Export your account data?\n\nThis will generate a download containing your account information and usage history.')) {
+        // In a real implementation, this would trigger a data export
+        showToast('Data export feature coming soon!', 'info');
+    }
+}
+
+function manageNotifications() {
+    showToast('Notification settings feature coming soon!', 'info');
+}
+
+function deleteAccount() {
+    const confirmation = prompt(
+        'This action will permanently delete your account and all associated data.\n\n' +
+        'Type "DELETE" to confirm account deletion:'
+    );
+    
+    if (confirmation === 'DELETE') {
+        if (confirm('Are you absolutely sure? This action cannot be undone.')) {
+            // In a real implementation, this would trigger account deletion
+            showToast('Account deletion feature coming soon!', 'info');
+        }
+    } else if (confirmation !== null) {
+        alert('Account deletion cancelled. You must type "DELETE" exactly to confirm.');
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 5000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle API key visibility
+    const toggleApiKey = document.getElementById('toggleApiKey');
+    const apiKeyField = document.getElementById('apiKeyField');
+    
+    if (toggleApiKey && apiKeyField) {
+        toggleApiKey.addEventListener('click', function() {
+            const type = apiKeyField.getAttribute('type') === 'password' ? 'text' : 'password';
+            apiKeyField.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    // Animate usage stats
+    const usageStats = document.querySelectorAll('.usage-stat');
+    usageStats.forEach((stat, index) => {
+        setTimeout(() => {
+            stat.style.opacity = '0';
+            stat.style.transform = 'translateY(20px)';
+            stat.style.transition = 'all 0.3s ease';
+            
+            setTimeout(() => {
+                stat.style.opacity = '1';
+                stat.style.transform = 'translateY(0)';
+            }, 100);
+        }, index * 100);
+    });
+});
+</script>
+{% endblock %}

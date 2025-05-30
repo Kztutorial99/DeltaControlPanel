@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Penghapusan Data Pengguna - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-trash-alt me-2"></i>Penghapusan Data Pengguna
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="data-deletion-content">
+                        <h4>Hak Penghapusan Data</h4>
+                        <p>Setiap pengguna memiliki hak untuk meminta penghapusan data pribadi mereka dari platform DeltaPro sesuai dengan regulasi perlindungan data yang berlaku.</p>
+                        
+                        <h4>Data yang Dapat Dihapus</h4>
+                        <ul>
+                            <li><strong>Informasi Profil:</strong> Nama, email, nomor telepon, dan foto profil</li>
+                            <li><strong>Data Akun:</strong> Username, password, dan preferensi akun</li>
+                            <li><strong>Riwayat Aktivitas:</strong> Log penggunaan layanan dan transaksi</li>
+                            <li><strong>Data Facebook:</strong> Informasi yang diperoleh melalui Facebook Login</li>
+                            <li><strong>Data Premium:</strong> Riwayat langganan dan pembayaran</li>
+                        </ul>
+                        
+                        <h4>Cara Mengajukan Penghapusan Data</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-user-cog me-2"></i>Melalui Akun</h5>
+                                        <ol>
+                                            <li>Login ke akun Anda</li>
+                                            <li>Masuk ke halaman Profil</li>
+                                            <li>Klik "Hapus Akun"</li>
+                                            <li>Konfirmasi penghapusan</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5><i class="fas fa-envelope me-2"></i>Melalui Email</h5>
+                                        <p>Kirim email ke:</p>
+                                        <p><strong>privacy@deltapro.com</strong></p>
+                                        <p>Dengan subjek: "Permintaan Penghapusan Data"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4>Informasi yang Diperlukan</h4>
+                        <p>Untuk memproses permintaan penghapusan data, Anda perlu menyertakan:</p>
+                        <ul>
+                            <li>Email yang terdaftar di akun DeltaPro</li>
+                            <li>Username atau ID akun</li>
+                            <li>Konfirmasi identitas (foto KTP/identitas resmi)</li>
+                            <li>Alasan penghapusan data (opsional)</li>
+                        </ul>
+                        
+                        <h4>Proses Penghapusan</h4>
+                        <div class="timeline">
+                            <div class="row">
+                                <div class="col-md-3 text-center">
+                                    <div class="badge bg-primary p-2 mb-2">
+                                        <i class="fas fa-paper-plane fa-2x"></i>
+                                    </div>
+                                    <h6>Permintaan Diterima</h6>
+                                    <p class="small">Dalam 24 jam</p>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="badge bg-warning p-2 mb-2">
+                                        <i class="fas fa-search fa-2x"></i>
+                                    </div>
+                                    <h6>Verifikasi Identitas</h6>
+                                    <p class="small">1-3 hari kerja</p>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="badge bg-info p-2 mb-2">
+                                        <i class="fas fa-cogs fa-2x"></i>
+                                    </div>
+                                    <h6>Proses Penghapusan</h6>
+                                    <p class="small">3-7 hari kerja</p>
+                                </div>
+                                <div class="col-md-3 text-center">
+                                    <div class="badge bg-success p-2 mb-2">
+                                        <i class="fas fa-check fa-2x"></i>
+                                    </div>
+                                    <h6>Konfirmasi Selesai</h6>
+                                    <p class="small">Email konfirmasi</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <h4>Data yang Dipertahankan</h4>
+                        <p>Beberapa data mungkin dipertahankan untuk keperluan:</p>
+                        <ul>
+                            <li>Kepatuhan terhadap kewajiban hukum</li>
+                            <li>Penyelesaian sengketa yang sedang berlangsung</li>
+                            <li>Pencegahan penipuan dan keamanan</li>
+                            <li>Data yang telah dianonimkan untuk analisis statistik</li>
+                        </ul>
+                        
+                        <h4>Penghapusan Data Facebook</h4>
+                        <div class="alert alert-info">
+                            <h5><i class="fab fa-facebook me-2"></i>Khusus Pengguna Facebook Login</h5>
+                            <p>Jika Anda menggunakan Facebook Login, data yang diperoleh dari Facebook akan dihapus dari sistem kami. Namun, untuk data di Facebook itu sendiri, Anda perlu mengelolanya langsung melalui pengaturan privasi Facebook Anda.</p>
+                            <p><strong>URL Penghapusan Data:</strong> <br>
+                            <code>https://yourdomain.com/data-deletion</code></p>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-4">
+                            <h5><i class="fas fa-exclamation-triangle me-2"></i>Peringatan Penting</h5>
+                            <ul class="mb-0">
+                                <li>Penghapusan data bersifat permanen dan tidak dapat dibatalkan</li>
+                                <li>Semua data terkait akun akan hilang termasuk riwayat transaksi</li>
+                                <li>Anda perlu membuat akun baru jika ingin menggunakan layanan lagi</li>
+                                <li>Proses penghapusan mungkin memakan waktu hingga 30 hari</li>
+                            </ul>
+                        </div>
+                        
+                        <h4>Kontak Dukungan</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><i class="fas fa-envelope me-2"></i><strong>Email:</strong> privacy@deltapro.com</p>
+                                <p><i class="fas fa-phone me-2"></i><strong>Telepon:</strong> +62-xxx-xxxx-xxxx</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><i class="fas fa-clock me-2"></i><strong>Jam Operasional:</strong></p>
+                                <p class="small">Senin - Jumat: 09:00 - 17:00 WIB<br>
+                                Sabtu: 09:00 - 14:00 WIB</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <small class="text-muted">
+                        Terakhir diperbarui: 30 Mei 2025
+                    </small>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-home me-2"></i>Kembali ke Beranda
+                </a>
+                <a href="mailto:privacy@deltapro.com?subject=Permintaan Penghapusan Data" class="btn btn-danger">
+                    <i class="fas fa-envelope me-2"></i>Kirim Permintaan
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    margin: 20px 0;
+}
+
+.timeline .badge {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.data-deletion-content h4 {
+    color: #dc3545;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.data-deletion-content h4:first-child {
+    margin-top: 0;
+}
+</style>
+{% endblock %}

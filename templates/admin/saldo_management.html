@@ -1,0 +1,337 @@
+
+{% extends "base.html" %}
+
+{% block title %}Saldo Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-coins text-primary me-2"></i>
+                        Saldo Management
+                    </h1>
+                    <p class="text-muted mb-0">Kelola dan transfer saldo ke pengguna</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendSaldoModal">
+                        <i class="fas fa-paper-plane me-2"></i>Send Saldo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-primary border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users text-primary fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ users|length }}</h4>
+                            <small class="text-muted">Total Users</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-success border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-coins text-success fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">Rp {{ "{:,.0f}".format(users|sum(attribute='balance')) }}</h4>
+                            <small class="text-muted">Total Saldo</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-warning border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exchange-alt text-warning fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ recent_transactions|length }}</h4>
+                            <small class="text-muted">Recent Transactions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-info border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-gift text-info fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ recent_transactions|selectattr('transaction_type', 'equalto', 'claim')|list|length }}</h4>
+                            <small class="text-muted">Daily Claims Today</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Users List -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users text-info me-2"></i>
+                            User Saldo List
+                        </h5>
+                        <input type="text" class="form-control form-control-sm" id="searchUsers" placeholder="Search users..." style="width: 200px;">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Current Saldo</th>
+                                    <th>Status</th>
+                                    <th>Last Activity</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                {% for user in users %}
+                                <tr class="user-row" data-username="{{ user.username.lower() }}" data-email="{{ user.email.lower() }}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="user-avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                {% if user.is_premium %}
+                                                    <i class="fas fa-crown"></i>
+                                                {% else %}
+                                                    <i class="fas fa-user"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ user.username }}</div>
+                                                <small class="text-muted">{{ user.email }}</small>
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-key me-1"></i>{{ user.api_key[:20] }}...
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success">Rp {{ "{:,.0f}".format(user.balance) }}</span>
+                                    </td>
+                                    <td>
+                                        {% if user.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                        
+                                        {% if user.is_premium %}
+                                            <br><span class="badge bg-warning text-dark mt-1">Premium</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {% if user.last_login %}
+                                                {{ user.last_login.strftime('%Y-%m-%d %H:%M') }}
+                                            {% else %}
+                                                Never
+                                            {% endif %}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="sendSaldoToUser('{{ user.id }}', '{{ user.username }}', {{ user.balance }})">
+                                            <i class="fas fa-paper-plane"></i> Send
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history text-info me-2"></i>
+                        Recent Transactions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_transactions %}
+                        <div class="transaction-list" style="max-height: 500px; overflow-y: auto;">
+                            {% for transaction in recent_transactions %}
+                            <div class="transaction-item d-flex align-items-center mb-3 p-2 bg-light rounded">
+                                <div class="transaction-icon me-3">
+                                    {% if transaction.transaction_type == 'claim' %}
+                                        <i class="fas fa-gift text-success"></i>
+                                    {% elif transaction.transaction_type == 'admin_transfer' %}
+                                        <i class="fas fa-paper-plane text-primary"></i>
+                                    {% elif transaction.transaction_type == 'usage' %}
+                                        <i class="fas fa-minus text-danger"></i>
+                                    {% else %}
+                                        <i class="fas fa-exchange-alt text-info"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium">{{ transaction.user.username }}</div>
+                                    <div class="small text-muted">{{ transaction.description or transaction.transaction_type.title() }}</div>
+                                    <div class="small text-muted">{{ transaction.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                                </div>
+                                <div class="transaction-amount">
+                                    {% if transaction.amount > 0 %}
+                                        <span class="text-success">+Rp {{ "{:,.0f}".format(transaction.amount) }}</span>
+                                    {% else %}
+                                        <span class="text-danger">Rp {{ "{:,.0f}".format(transaction.amount) }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history text-muted mb-3" style="font-size: 2rem;"></i>
+                            <p class="text-muted">No transactions yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Saldo Modal -->
+<div class="modal fade" id="sendSaldoModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-paper-plane me-2"></i>Send Saldo
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_send_saldo') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select User</label>
+                        <select class="form-select" name="user_id" id="modalUserId" required>
+                            <option value="">Choose user...</option>
+                            {% for user in users %}
+                            <option value="{{ user.id }}" data-balance="{{ user.balance }}">{{ user.username }} (Rp {{ "{:,.0f}".format(user.balance) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Amount (Rp)</label>
+                        <input type="number" class="form-control" name="amount" min="1000" step="1000" required placeholder="Enter amount">
+                        <div class="form-text">Minimum Rp 1.000</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" name="description" rows="3" placeholder="Reason for transfer..."></textarea>
+                    </div>
+                    
+                    <div id="userInfo" class="alert alert-info" style="display: none;">
+                        <h6>User Information:</h6>
+                        <div id="userInfoContent"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Send Saldo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Search functionality
+document.getElementById('searchUsers').addEventListener('input', function() {
+    const search = this.value.toLowerCase();
+    const rows = document.querySelectorAll('.user-row');
+    
+    rows.forEach(row => {
+        const username = row.dataset.username;
+        const email = row.dataset.email;
+        const show = username.includes(search) || email.includes(search);
+        row.style.display = show ? '' : 'none';
+    });
+});
+
+// Send saldo to specific user
+function sendSaldoToUser(userId, username, currentBalance) {
+    const modal = new bootstrap.Modal(document.getElementById('sendSaldoModal'));
+    const userSelect = document.getElementById('modalUserId');
+    const userInfo = document.getElementById('userInfo');
+    const userInfoContent = document.getElementById('userInfoContent');
+    
+    // Select the user
+    userSelect.value = userId;
+    
+    // Show user info
+    userInfo.style.display = 'block';
+    userInfoContent.innerHTML = `
+        <strong>Username:</strong> ${username}<br>
+        <strong>Current Balance:</strong> Rp ${currentBalance.toLocaleString()}<br>
+        <strong>User ID:</strong> ${userId}
+    `;
+    
+    modal.show();
+}
+
+// Update user info when selection changes
+document.getElementById('modalUserId').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const userInfo = document.getElementById('userInfo');
+    const userInfoContent = document.getElementById('userInfoContent');
+    
+    if (this.value) {
+        const balance = selectedOption.dataset.balance;
+        const username = selectedOption.text.split(' (')[0];
+        
+        userInfo.style.display = 'block';
+        userInfoContent.innerHTML = `
+            <strong>Username:</strong> ${username}<br>
+            <strong>Current Balance:</strong> Rp ${parseFloat(balance).toLocaleString()}<br>
+            <strong>User ID:</strong> ${this.value}
+        `;
+    } else {
+        userInfo.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

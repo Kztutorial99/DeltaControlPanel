@@ -1,0 +1,204 @@
+
+{% extends "base.html" %}
+
+{% block title %}Settings - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="profile-avatar bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="fas fa-cog fa-2x"></i>
+                    </div>
+                    <h3 class="mb-1">Account Settings</h3>
+                    <p class="text-muted">Manage your notification preferences and account settings</p>
+                </div>
+            </div>
+
+            <!-- Notification Settings -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell text-primary me-2"></i>
+                        Notification Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('update_user_settings') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="setting-item d-flex justify-content-between align-items-center p-3 mb-3 bg-light rounded">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-envelope text-primary me-2"></i>
+                                            Email Notifications
+                                        </h6>
+                                        <p class="text-muted small mb-0">Receive notifications via email</p>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="email_notifications" 
+                                               id="emailNotifications" {{ 'checked' if settings.email_notifications else '' }}>
+                                        <label class="form-check-label" for="emailNotifications"></label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item d-flex justify-content-between align-items-center p-3 mb-3 bg-light rounded">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-mobile-alt text-success me-2"></i>
+                                            Push Notifications
+                                        </h6>
+                                        <p class="text-muted small mb-0">Receive in-app notifications</p>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="push_notifications" 
+                                               id="pushNotifications" {{ 'checked' if settings.push_notifications else '' }}>
+                                        <label class="form-check-label" for="pushNotifications"></label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item d-flex justify-content-between align-items-center p-3 mb-3 bg-light rounded">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-bullhorn text-warning me-2"></i>
+                                            Marketing Notifications
+                                        </h6>
+                                        <p class="text-muted small mb-0">Receive promotional offers and updates</p>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="marketing_notifications" 
+                                               id="marketingNotifications" {{ 'checked' if settings.marketing_notifications else '' }}>
+                                        <label class="form-check-label" for="marketingNotifications"></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="setting-item d-flex justify-content-between align-items-center p-3 mb-3 bg-light rounded">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-tools text-info me-2"></i>
+                                            Maintenance Notifications
+                                        </h6>
+                                        <p class="text-muted small mb-0">Get notified about system maintenance</p>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="maintenance_notifications" 
+                                               id="maintenanceNotifications" {{ 'checked' if settings.maintenance_notifications else '' }}>
+                                        <label class="form-check-label" for="maintenanceNotifications"></label>
+                                    </div>
+                                </div>
+
+                                <div class="setting-item d-flex justify-content-between align-items-center p-3 mb-3 bg-light rounded">
+                                    <div>
+                                        <h6 class="mb-1">
+                                            <i class="fas fa-credit-card text-danger me-2"></i>
+                                            Payment Notifications
+                                        </h6>
+                                        <p class="text-muted small mb-0">Receive payment and billing alerts</p>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="payment_notifications" 
+                                               id="paymentNotifications" {{ 'checked' if settings.payment_notifications else '' }}>
+                                        <label class="form-check-label" for="paymentNotifications"></label>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> Critical security notifications cannot be disabled and will always be sent.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Save Settings
+                                </button>
+                                <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary ms-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Profile
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-shield-alt text-success me-2"></i>
+                        Privacy & Security
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="privacy-item d-flex align-items-start p-3 mb-3 bg-light rounded">
+                                <i class="fas fa-key text-primary me-3 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">API Key Management</h6>
+                                    <p class="text-muted small mb-2">Regenerate your API key for enhanced security</p>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="regenerateApiKey()">
+                                        <i class="fas fa-sync me-1"></i>Regenerate
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="privacy-item d-flex align-items-start p-3 mb-3 bg-light rounded">
+                                <i class="fas fa-download text-info me-3 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">Export Data</h6>
+                                    <p class="text-muted small mb-2">Download your account data and history</p>
+                                    <button class="btn btn-sm btn-outline-info" onclick="exportData()">
+                                        <i class="fas fa-download me-1"></i>Export
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function regenerateApiKey() {
+    if (confirm('Are you sure you want to regenerate your API key? This will invalidate your current API key.')) {
+        window.location.href = '{{ url_for("regenerate_api_key") }}';
+    }
+}
+
+function exportData() {
+    showToast('Data export feature will be available soon!', 'info');
+}
+
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 1060; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

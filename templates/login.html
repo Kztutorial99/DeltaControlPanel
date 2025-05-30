@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Login - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+        <div class="card login-card">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="login-logo">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2 class="fw-bold text-primary">DeltaPro</h2>
+                    <p class="text-muted">Access your account securely</p>
+                </div>
+
+                <form method="POST" class="login-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user me-2"></i>Username
+                        </label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Password
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="api_key" class="form-label">
+                            <i class="fas fa-key me-2"></i>API Key <span class="text-muted">(Optional)</span>
+                        </label>
+                        <input type="text" class="form-control" id="api_key" name="api_key" 
+                               placeholder="Enter your API key for enhanced security">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            API key provides additional security layer for your account
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </button>
+                </form>
+
+                <!-- Social Login Options -->
+                <div class="social-login">
+                    <div class="divider mb-3">
+                        <span class="divider-text">Or continue with</span>
+                    </div>
+
+                    <!-- Facebook Login Button -->
+                    {% if facebook_config and facebook_config.is_enabled and facebook_config.app_id %}
+                    <div id="facebook-login-container" class="mb-3">
+                        <!-- Direct Facebook login button (works better than FB SDK button) -->
+                        <a href="{{ url_for('facebook_auth.facebook_login') }}" 
+                           class="btn btn-facebook w-100">
+                            <i class="fab fa-facebook-f me-2"></i>Continue with Facebook
+                        </a>
+
+                        <!-- FB SDK button as alternative (hidden by default) -->
+                        <div id="fb-sdk-button" style="display: none;">
+                            <fb:login-button 
+                                scope="public_profile,email"
+                                onlogin="checkLoginState();"
+                                class="btn btn-facebook w-100">
+                                <i class="fab fa-facebook-f me-2"></i>Continue with Facebook
+                            </fb:login-button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="mb-3">
+                        <button class="btn btn-secondary w-100" disabled>
+                            <i class="fab fa-facebook-f me-2"></i>Facebook Login Not Available
+                        </button>
+                        <small class="text-muted">Facebook login is currently disabled</small>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="text-center">
+                    <p class="text-muted mb-2">
+                        Need assistance? Contact our support team
+                    </p>
+                    <p class="text-muted mb-0">
+                        <a href="{{ url_for('premium') }}" class="text-warning text-decoration-none">
+                            <i class="fas fa-crown me-1"></i>Learn about Premium
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Security Notice -->
+                <div class="security-notice mt-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <strong>Security Notice:</strong> All login attempts are monitored and logged. 
+                        Premium users have device binding enabled for enhanced security.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facebook SDK -->
+        {% if facebook_config and facebook_config.is_enabled and facebook_config.app_id %}
+        <script>
+            window.fbAsyncInit = function() {
+                FB.init({
+                    appId: '{{ facebook_config.app_id }}',
+                    cookie: true,
+                    xfbml: true,
+                    version: 'v18.0'
+                });
+
+                FB.AppEvents.logPageView();
+            };
+
+            function statusChangeCallback(response) {
+                if (response.status === 'connected') {
+                    // User is logged into Facebook and your app
+                    window.location.href = "{{ url_for('facebook_auth.facebook_callback') }}?code=" + response.authResponse.accessToken;
+                } else if (response.status === 'not_authorized') {
+                    // User is logged into Facebook but not connected to your app
+                    console.log('Please authorize this app');
+                } else {
+                    // User is not logged into Facebook
+                    console.log('Please log into Facebook');
+                }
+            }
+
+            function checkLoginState() {
+                FB.getLoginStatus(function(response) {
+                    statusChangeCallback(response);
+                });
+            }
+        </script>
+        {% endif %}
+
+        <!-- Features Preview -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-star text-warning me-2"></i>Platform Features
+                </h6>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <i class="fas fa-mobile-alt text-primary mb-2"></i>
+                        <small class="d-block">8 OTP Providers</small>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-shield-alt text-success mb-2"></i>
+                        <small class="d-block">Secure Access</small>
+                    </div>
+                    <div class="col-4">
+                        <i class="fas fa-chart-line text-info mb-2"></i>
+                        <small class="d-block">Real-time Stats</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+
+    if (togglePassword && passwordField) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+
+            const icon = this.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
+
+    // Form validation
+    const form = document.querySelector('.login-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                e.preventDefault();
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            if (password.length < 3) {
+                e.preventDefault();
+                alert('Password must be at least 3 characters long');
+                return;
+            }
+        });
+    }
+
+    // Auto-focus username field
+    const usernameField = document.getElementById('username');
+    if (usernameField) {
+        usernameField.focus();
+    }
+});
+</script>
+{% endblock %}

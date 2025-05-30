@@ -1,0 +1,668 @@
+
+{% extends "base.html" %}
+
+{% block title %}OTP Service Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-mobile-alt text-primary me-2"></i>
+                        OTP Service Management
+                    </h1>
+                    <p class="text-muted mb-0">Kelola layanan OTP dan buat layanan custom</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                        <i class="fas fa-plus me-2"></i>Add Service
+                    </button>
+                    <button class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#serviceGuideModal">
+                        <i class="fas fa-book me-2"></i>Guide
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-success border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle text-success fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ active_services }}</h4>
+                            <small class="text-muted">Active Services</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-warning border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-tools text-warning fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ maintenance_services }}</h4>
+                            <small class="text-muted">Maintenance</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-info border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-code text-info fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ custom_services }}</h4>
+                            <small class="text-muted">Custom Services</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-primary border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-chart-line text-primary fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ "{:.1f}".format(avg_success_rate) }}%</h4>
+                            <small class="text-muted">Avg Success Rate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Default Services -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-cog text-info me-2"></i>
+                Default OTP Services
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for provider in default_providers %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border {% if provider.is_active %}border-success{% elif provider.is_maintenance %}border-warning{% else %}border-danger{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="mb-1">{{ provider.display_name }}</h6>
+                                    <small class="text-muted">{{ provider.name }}</small>
+                                </div>
+                                {% if provider.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% elif provider.is_maintenance %}
+                                    <span class="badge bg-warning">Maintenance</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Disabled</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="row text-center">
+                                    <div class="col-4">
+                                        <div class="border-end">
+                                            <h6 class="mb-0">{{ "{:.1f}".format(provider.success_rate) }}%</h6>
+                                            <small class="text-muted">Success</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="border-end">
+                                            <h6 class="mb-0">{{ provider.total_requests }}</h6>
+                                            <small class="text-muted">Total</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <h6 class="mb-0">Rp {{ "{:,.0f}".format(provider.cost_per_request) }}</h6>
+                                        <small class="text-muted">Cost</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-info flex-fill" onclick="viewServiceLogs('{{ provider.id }}')">
+                                    <i class="fas fa-chart-bar"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary flex-fill" onclick="editService('{{ provider.id }}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning flex-fill" onclick="toggleMaintenance('{{ provider.id }}')">
+                                    <i class="fas fa-tools"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary flex-fill" onclick="toggleStatus('{{ provider.id }}')">
+                                    <i class="fas fa-power-off"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Services -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-code text-primary me-2"></i>
+                    Custom OTP Services
+                </h5>
+                <button class="btn btn-outline-primary btn-sm" onclick="testAllServices()">
+                    <i class="fas fa-flask me-1"></i>Test All
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if custom_services %}
+                <div class="row">
+                    {% for service in custom_services %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border {% if service.is_active %}border-primary{% elif service.is_maintenance %}border-warning{% else %}border-secondary{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h6 class="mb-1">{{ service.name }}</h6>
+                                        <small class="text-muted">Prefix: {{ service.prefix_code }}</small>
+                                    </div>
+                                    <div>
+                                        {% if service.is_active %}
+                                            <span class="badge bg-primary">Active</span>
+                                        {% elif service.is_maintenance %}
+                                            <span class="badge bg-warning">Maintenance</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Disabled</span>
+                                        {% endif %}
+                                        
+                                        {% if service.is_premium_only %}
+                                            <br><span class="badge bg-warning text-dark mt-1">Premium</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <div class="border-end">
+                                                <h6 class="mb-0">{{ "{:.1f}".format(service.success_rate) }}%</h6>
+                                                <small class="text-muted">Success Rate</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="mb-0">{{ service.total_requests }}</h6>
+                                            <small class="text-muted">Total Requests</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <small class="text-muted">Description:</small>
+                                    <div class="small">{{ service.description or 'No description' }}</div>
+                                </div>
+                                
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-success" onclick="testService('{{ service.id }}')" title="Test Service">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editCustomService('{{ service.id }}')" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="viewCode('{{ service.id }}')" title="View Code">
+                                        <i class="fas fa-code"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning" onclick="toggleCustomMaintenance('{{ service.id }}')" title="Maintenance">
+                                        <i class="fas fa-tools"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteService('{{ service.id }}')" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-code text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted">No Custom Services</h5>
+                    <p class="text-muted">Create your first custom OTP service to get started.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+                        <i class="fas fa-plus me-2"></i>Create Service
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Add Custom OTP Service
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_add_otp_service') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Service Name</label>
+                        <input type="text" class="form-control" name="name" required placeholder="e.g., TikTok">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Prefix Code</label>
+                        <input type="text" class="form-control" name="prefix_code" required placeholder="e.g., 62" maxlength="10">
+                        <div class="form-text">Country or service prefix code</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Cost Per Request (Rp)</label>
+                        <input type="number" class="form-control" name="cost_per_request" min="0" step="0.01" value="0">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="2" placeholder="Brief description of the service"></textarea>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_premium_only" id="isPremiumOnly">
+                                <label class="form-check-label" for="isPremiumOnly">
+                                    Premium Only
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+                                <label class="form-check-label" for="isActive">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Service Code (Python)</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">Python function that handles OTP request</small>
+                            <button type="button" class="btn btn-sm btn-outline-info" onclick="loadTemplate()">
+                                <i class="fas fa-file-code me-1"></i>Load Template
+                            </button>
+                        </div>
+                        <textarea class="form-control font-monospace" name="service_code" rows="15" required id="serviceCode" placeholder="def request_otp(phone_number):&#10;    # Your implementation here&#10;    return {'success': True, 'message': 'OTP sent', 'data': {}}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" onclick="testCode()">
+                        <i class="fas fa-flask me-1"></i>Test Code
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Service
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Service Guide Modal -->
+<div class="modal fade" id="serviceGuideModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-book me-2"></i>OTP Service Development Guide
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>Function Requirements</h6>
+                        <ul>
+                            <li>Function must be named <code>request_otp</code></li>
+                            <li>Must accept <code>phone_number</code> parameter</li>
+                            <li>Must return a dictionary with <code>success</code>, <code>message</code>, and <code>data</code> keys</li>
+                            <li>Handle exceptions properly</li>
+                        </ul>
+                        
+                        <h6>Available Libraries</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><code>requests</code> - HTTP requests</li>
+                                    <li><code>json</code> - JSON handling</li>
+                                    <li><code>uuid</code> - UUID generation</li>
+                                    <li><code>datetime</code> - Date/time</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li><code>random</code> - Random numbers</li>
+                                    <li><code>string</code> - String operations</li>
+                                    <li><code>time</code> - Time functions</li>
+                                    <li><code>hashlib</code> - Hashing</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <h6>Response Format</h6>
+                        <pre class="bg-light p-3"><code>{
+    "success": True/False,
+    "message": "Human readable message",
+    "data": {
+        "otp_code": "123456",  # Optional
+        "request_id": "xyz",   # Optional
+        "additional_info": {}  # Optional
+    }
+}</code></pre>
+                    </div>
+                    <div class="col-md-4">
+                        <h6>Example Template</h6>
+                        <pre class="bg-light p-2 small"><code>import requests
+import json
+
+def request_otp(phone_number):
+    try:
+        # Clean phone number
+        phone = phone_number.replace('+62', '0')
+        
+        # Prepare request
+        headers = {
+            'User-Agent': 'Mozilla/5.0...',
+            'Content-Type': 'application/json'
+        }
+        
+        data = {
+            'phone': phone
+        }
+        
+        # Send request
+        response = requests.post(
+            'https://api.example.com/otp',
+            headers=headers,
+            json=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('success'):
+                return {
+                    'success': True,
+                    'message': 'OTP sent successfully',
+                    'data': {
+                        'otp_code': 'Check SMS',
+                        'request_id': result.get('id')
+                    }
+                }
+        
+        return {
+            'success': False,
+            'message': 'Failed to send OTP',
+            'data': {}
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f'Error: {str(e)}',
+            'data': {}
+        }</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function loadTemplate() {
+    const template = `import requests
+import json
+
+def request_otp(phone_number):
+    try:
+        # Clean phone number format
+        phone = phone_number.replace('+62', '0').replace(' ', '').replace('-', '')
+        
+        # Request headers
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
+        
+        # Request payload
+        data = {
+            'phone': phone
+        }
+        
+        # Send OTP request
+        response = requests.post(
+            'https://api.example.com/send-otp',
+            headers=headers,
+            json=data,
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            if result.get('success', False):
+                return {
+                    'success': True,
+                    'message': 'OTP sent successfully',
+                    'data': {
+                        'otp_code': 'Check SMS',
+                        'request_id': result.get('request_id'),
+                        'provider_response': result
+                    }
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': result.get('message', 'Unknown error'),
+                    'data': {}
+                }
+        else:
+            return {
+                'success': False,
+                'message': f'HTTP Error: {response.status_code}',
+                'data': {}
+            }
+            
+    except requests.exceptions.Timeout:
+        return {
+            'success': False,
+            'message': 'Request timeout',
+            'data': {}
+        }
+    except requests.exceptions.RequestException as e:
+        return {
+            'success': False,
+            'message': f'Network error: {str(e)}',
+            'data': {}
+        }
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f'Unexpected error: {str(e)}',
+            'data': {}
+        }`;
+    
+    document.getElementById('serviceCode').value = template;
+}
+
+function testCode() {
+    const code = document.getElementById('serviceCode').value;
+    const testPhone = '+6281234567890';
+    
+    if (!code.trim()) {
+        alert('Please enter service code first');
+        return;
+    }
+    
+    fetch('/admin/test-otp-service-code', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            code: code,
+            test_phone: testPhone
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Code test successful!\\n\\nResult: ' + JSON.stringify(data.result, null, 2));
+        } else {
+            alert('Code test failed!\\n\\nError: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Test failed: ' + error.message);
+    });
+}
+
+function testService(serviceId) {
+    const phone = prompt('Enter test phone number:', '+6281234567890');
+    if (phone) {
+        fetch(\`/admin/test-custom-service/\${serviceId}\`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({test_phone: phone})
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(\`Test Result:\\n\\nSuccess: \${data.success}\\nMessage: \${data.message}\\nData: \${JSON.stringify(data.data, null, 2)}\`);
+        });
+    }
+}
+
+function editCustomService(serviceId) {
+    window.location.href = \`/admin/edit-otp-service/\${serviceId}\`;
+}
+
+function viewCode(serviceId) {
+    fetch(\`/admin/view-service-code/\${serviceId}\`)
+        .then(response => response.text())
+        .then(code => {
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(\`
+                <html>
+                    <head><title>Service Code</title></head>
+                    <body>
+                        <h3>Service Code</h3>
+                        <pre style="background: #f8f9fa; padding: 20px; border-radius: 5px;">\${code}</pre>
+                    </body>
+                </html>
+            \`);
+        });
+}
+
+function toggleCustomMaintenance(serviceId) {
+    if (confirm('Toggle maintenance mode for this service?')) {
+        fetch(\`/admin/toggle-custom-maintenance/\${serviceId}\`, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+    }
+}
+
+function deleteService(serviceId) {
+    if (confirm('Are you sure you want to delete this service? This action cannot be undone.')) {
+        fetch(\`/admin/delete-otp-service/\${serviceId}\`, {method: 'DELETE'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+    }
+}
+
+function toggleMaintenance(providerId) {
+    if (confirm('Toggle maintenance mode for this provider?')) {
+        fetch(\`/admin/toggle-maintenance/\${providerId}\`, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+    }
+}
+
+function toggleStatus(providerId) {
+    if (confirm('Toggle active status for this provider?')) {
+        fetch(\`/admin/toggle-provider-status/\${providerId}\`, {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+    }
+}
+
+function testAllServices() {
+    if (confirm('This will test all active services with a sample phone number. Continue?')) {
+        fetch('/admin/test-all-services', {method: 'POST'})
+            .then(response => response.json())
+            .then(data => {
+                alert('Test completed! Check admin logs for results.');
+            });
+    }
+}
+</script>
+{% endblock %}

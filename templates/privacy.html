@@ -1,0 +1,96 @@
+
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="card-title mb-0">
+                        <i class="fas fa-user-shield me-2"></i>Privacy Policy
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="privacy-content">
+                        <h4>Komitmen Privasi</h4>
+                        <p>Kami berkomitmen untuk melindungi privasi pengguna. Data yang dikumpulkan digunakan hanya untuk keperluan layanan dan tidak dibagikan tanpa izin pengguna.</p>
+                        
+                        <h4>Data yang Dikumpulkan</h4>
+                        <ul>
+                            <li><strong>Informasi Akun:</strong> Username, email, dan informasi profil</li>
+                            <li><strong>Data Penggunaan:</strong> Log aktivitas, statistik penggunaan layanan</li>
+                            <li><strong>Informasi Teknis:</strong> Alamat IP, jenis browser, perangkat yang digunakan</li>
+                            <li><strong>Data Transaksi:</strong> Riwayat pembayaran dan penggunaan layanan premium</li>
+                        </ul>
+                        
+                        <h4>Penggunaan Data</h4>
+                        <p>Data yang kami kumpulkan digunakan untuk:</p>
+                        <ul>
+                            <li>Menyediakan dan meningkatkan layanan</li>
+                            <li>Verifikasi identitas dan keamanan akun</li>
+                            <li>Komunikasi terkait layanan</li>
+                            <li>Analisis penggunaan untuk pengembangan fitur</li>
+                            <li>Kepatuhan terhadap regulasi yang berlaku</li>
+                        </ul>
+                        
+                        <h4>Perlindungan Data</h4>
+                        <ul>
+                            <li>Enkripsi SSL/TLS untuk semua komunikasi</li>
+                            <li>Penyimpanan data dengan standar keamanan tinggi</li>
+                            <li>Akses terbatas hanya untuk personel yang berwenang</li>
+                            <li>Backup dan pemulihan data secara berkala</li>
+                        </ul>
+                        
+                        <h4>Hak Pengguna</h4>
+                        <p>Pengguna memiliki hak untuk:</p>
+                        <ul>
+                            <li>Mengakses data pribadi yang tersimpan</li>
+                            <li>Meminta perbaikan data yang tidak akurat</li>
+                            <li>Menghapus akun dan data pribadi</li>
+                            <li>Membatasi pemrosesan data tertentu</li>
+                            <li>Memindahkan data ke layanan lain</li>
+                        </ul>
+                        
+                        <h4>Berbagi Data dengan Pihak Ketiga</h4>
+                        <p>Kami tidak membagikan data pribadi dengan pihak ketiga kecuali:</p>
+                        <ul>
+                            <li>Atas persetujuan eksplisit pengguna</li>
+                            <li>Untuk memenuhi kewajiban hukum</li>
+                            <li>Dengan penyedia layanan yang terpercaya untuk operasional platform</li>
+                        </ul>
+                        
+                        <h4>Cookie dan Teknologi Pelacakan</h4>
+                        <p>Kami menggunakan cookie untuk meningkatkan pengalaman pengguna, menyimpan preferensi, dan menganalisis penggunaan website.</p>
+                        
+                        <h4>Kontak</h4>
+                        <p>Untuk pertanyaan terkait privacy policy atau permintaan akses data, silakan hubungi kami melalui:</p>
+                        <ul>
+                            <li>Email: privacy@deltapro.com</li>
+                            <li>Halaman kontak di website</li>
+                        </ul>
+                        
+                        <div class="alert alert-info mt-4">
+                            <h5><i class="fas fa-info-circle me-2"></i>Perubahan Privacy Policy</h5>
+                            <p class="mb-0">Privacy policy ini dapat diperbarui sewaktu-waktu. Perubahan signifikan akan diberitahukan melalui email atau notifikasi di platform.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <small class="text-muted">
+                        Terakhir diperbarui: 30 Mei 2025
+                    </small>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Kembali ke Beranda
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+
+{% extends "base.html" %}
+
+{% block title %}System Maintenance{% endblock %}
+
+{% block extra_styles %}
+<style>
+.maintenance-background {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.maintenance-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.maintenance-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.maintenance-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 2rem 0;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #667eea;
+    animation: loading 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+.dot:nth-child(3) { animation-delay: 0s; }
+
+@keyframes loading {
+    0%, 80%, 100% {
+        transform: scale(0);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+.feature-list {
+    text-align: left;
+    list-style: none;
+    padding: 0;
+}
+
+.feature-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.feature-list li:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="maintenance-background">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="maintenance-card p-5 text-center">
+                    <div class="maintenance-icon">
+                        <i class="fas fa-tools fa-3x text-white"></i>
+                    </div>
+                    
+                    <h1 class="h2 mb-3 text-dark">System Under Maintenance</h1>
+                    <p class="lead text-muted mb-4">
+                        We're currently performing scheduled maintenance to improve your experience.
+                    </p>
+                    
+                    <div class="maintenance-dots">
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                    
+                    <div class="bg-light rounded p-4 mb-4">
+                        <h5 class="text-dark mb-3">
+                            <i class="fas fa-clock text-primary me-2"></i>
+                            What's Being Updated:
+                        </h5>
+                        <ul class="feature-list">
+                            <li>
+                                <i class="fas fa-server text-success me-2"></i>
+                                Database optimization
+                            </li>
+                            <li>
+                                <i class="fas fa-shield-alt text-warning me-2"></i>
+                                Security enhancements
+                            </li>
+                            <li>
+                                <i class="fas fa-rocket text-info me-2"></i>
+                                Performance improvements
+                            </li>
+                            <li>
+                                <i class="fas fa-mobile-alt text-primary me-2"></i>
+                                New features deployment
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="alert alert-info border-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Estimated downtime:</strong> 15-30 minutes
+                    </div>
+                    
+                    <p class="text-muted">
+                        Thank you for your patience. We'll be back shortly!
+                    </p>
+                    
+                    <div class="mt-4">
+                        <button class="btn btn-primary me-2" onclick="checkStatus()">
+                            <i class="fas fa-sync me-2"></i>Check Status
+                        </button>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Admin Login
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-top">
+                        <small class="text-muted">
+                            <i class="fas fa-envelope me-1"></i>
+                            Need urgent support? Contact us at 
+                            <a href="mailto:admin@deltapro.internal" class="text-decoration-none">admin@deltapro.internal</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function checkStatus() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Checking...';
+    
+    setTimeout(() => {
+        // Reload page to check if maintenance is over
+        window.location.reload();
+    }, 2000);
+}
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+    window.location.reload();
+}, 30000);
+</script>
+{% endblock %}

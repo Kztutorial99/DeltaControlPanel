@@ -1,0 +1,436 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Messages - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-comments text-primary me-2"></i>
+                        Admin Messages
+                    </h1>
+                    <p class="text-muted mb-0">Manage user communications and support requests</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="markAllRead()">
+                        <i class="fas fa-check-double me-2"></i>Mark All Read
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-info border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-info bg-opacity-10 rounded me-3">
+                        <i class="fas fa-envelope text-info"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ messages|length }}</h4>
+                        <small class="text-muted">Total Messages</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-warning border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-warning bg-opacity-10 rounded me-3">
+                        <i class="fas fa-envelope-open text-warning"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ messages|rejectattr('is_read')|list|length }}</h4>
+                        <small class="text-muted">Unread Messages</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-success border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-success bg-opacity-10 rounded me-3">
+                        <i class="fas fa-reply text-success"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">0</h4>
+                        <small class="text-muted">Pending Replies</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-white rounded-3 p-3 shadow-sm border-start border-primary border-3">
+                <div class="d-flex align-items-center">
+                    <div class="stat-icon bg-primary bg-opacity-10 rounded me-3">
+                        <i class="fas fa-users text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 mb-0">{{ messages|map(attribute='sender')|unique|list|length }}</h4>
+                        <small class="text-muted">Active Users</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-inbox text-info me-2"></i>
+                            Inbox
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm" id="messageFilter" style="width: auto;">
+                                <option value="all">All Messages</option>
+                                <option value="unread">Unread Only</option>
+                                <option value="read">Read Only</option>
+                                <option value="today">Today</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if messages %}
+                        <div class="message-list">
+                            {% for message in messages %}
+                            <div class="message-item border-bottom p-4 {% if not message.is_read %}bg-light{% endif %}" 
+                                 data-read="{{ message.is_read }}"
+                                 data-date="{{ message.created_at.strftime('%Y-%m-%d') }}">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-start">
+                                            <div class="sender-avatar bg-primary text-white rounded-circle me-3 d-flex align-items-center justify-content-center flex-shrink-0" 
+                                                 style="width: 45px; height: 45px;">
+                                                {% if message.sender.is_premium_active() %}
+                                                    <i class="fas fa-crown"></i>
+                                                {% else %}
+                                                    <i class="fas fa-user"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <h6 class="mb-0 me-2">{{ message.sender.username }}</h6>
+                                                    {% if message.sender.is_premium_active() %}
+                                                        <span class="badge bg-warning text-dark me-2">
+                                                            <i class="fas fa-crown me-1"></i>VIP
+                                                        </span>
+                                                    {% endif %}
+                                                    {% if not message.is_read %}
+                                                        <span class="badge bg-primary">New</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="h6 mb-2 text-dark">{{ message.subject }}</div>
+                                                <div class="text-muted message-preview">
+                                                    {{ message.content[:100] }}{% if message.content|length > 100 %}...{% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <div class="message-meta">
+                                            <div class="text-muted small mb-2">
+                                                <i class="fas fa-clock me-1"></i>
+                                                {{ message.created_at|datetime }}
+                                            </div>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" 
+                                                        onclick="viewMessage({{ message.id }})"
+                                                        title="View Full Message">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="btn btn-outline-success" 
+                                                        onclick="replyToMessage({{ message.id }})"
+                                                        title="Reply">
+                                                    <i class="fas fa-reply"></i>
+                                                </button>
+                                                {% if not message.is_read %}
+                                                <button class="btn btn-outline-warning" 
+                                                        onclick="markAsRead({{ message.id }})"
+                                                        title="Mark as Read">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox text-muted mb-3" style="font-size: 4rem;"></i>
+                            <h5 class="text-muted">No Messages</h5>
+                            <p class="text-muted">User messages will appear here when received.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Message Modal -->
+<div class="modal fade" id="viewMessageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-envelope-open me-2"></i>Message Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="messageContent">
+                <!-- Message content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="replyFromModal()">
+                    <i class="fas fa-reply me-2"></i>Reply
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-reply text-success me-2"></i>Reply to Message
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="replyForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Reply to:</label>
+                        <div class="bg-light p-3 rounded">
+                            <div id="originalSender"></div>
+                            <div id="originalSubject" class="fw-medium"></div>
+                            <div id="originalContent" class="text-muted small mt-2"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="replyContent" class="form-label">Your Reply:</label>
+                        <textarea class="form-control" id="replyContent" name="content" rows="6" 
+                                  required placeholder="Type your reply here..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-paper-plane me-2"></i>Send Reply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentMessageId = null;
+
+// Filter messages
+document.getElementById('messageFilter').addEventListener('change', function() {
+    const filter = this.value;
+    const items = document.querySelectorAll('.message-item');
+    const today = new Date().toISOString().split('T')[0];
+    
+    items.forEach(item => {
+        let show = true;
+        
+        switch(filter) {
+            case 'unread':
+                show = item.dataset.read === 'False';
+                break;
+            case 'read':
+                show = item.dataset.read === 'True';
+                break;
+            case 'today':
+                show = item.dataset.date === today;
+                break;
+            case 'all':
+            default:
+                show = true;
+        }
+        
+        item.style.display = show ? '' : 'none';
+    });
+});
+
+// View message
+function viewMessage(messageId) {
+    currentMessageId = messageId;
+    
+    // In a real app, this would fetch message details via AJAX
+    const messageContent = document.getElementById('messageContent');
+    messageContent.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('viewMessageModal'));
+    modal.show();
+    
+    // Simulate loading message content
+    setTimeout(() => {
+        messageContent.innerHTML = `
+            <div class="message-full">
+                <div class="message-header bg-light p-3 rounded mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">From: User</h6>
+                            <small class="text-muted">Subject: Message Subject</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">Received: Just now</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="message-body">
+                    <p>Full message content would be displayed here...</p>
+                    <p>This is a sample message from a user requesting support or asking questions about the service.</p>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+// Reply to message
+function replyToMessage(messageId) {
+    currentMessageId = messageId;
+    
+    // Set the form action
+    const form = document.getElementById('replyForm');
+    form.action = `/admin/messages/reply/${messageId}`;
+    
+    // Set original message details
+    document.getElementById('originalSender').textContent = 'Username';
+    document.getElementById('originalSubject').textContent = 'Re: Original Subject';
+    document.getElementById('originalContent').textContent = 'Original message preview...';
+    
+    // Clear reply content
+    document.getElementById('replyContent').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('replyModal'));
+    modal.show();
+}
+
+// Reply from view modal
+function replyFromModal() {
+    if (currentMessageId) {
+        bootstrap.Modal.getInstance(document.getElementById('viewMessageModal')).hide();
+        setTimeout(() => replyToMessage(currentMessageId), 300);
+    }
+}
+
+// Mark as read
+async function markAsRead(messageId) {
+    try {
+        const response = await fetch(`/messages/${messageId}/read`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        if (response.ok) {
+            // Update UI
+            const messageItem = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (messageItem) {
+                messageItem.classList.remove('bg-light');
+                messageItem.dataset.read = 'True';
+                const newBadge = messageItem.querySelector('.badge.bg-primary');
+                if (newBadge) newBadge.remove();
+            }
+            
+            // Update unread count
+            updateUnreadCount();
+        }
+    } catch (error) {
+        console.error('Error marking message as read:', error);
+    }
+}
+
+// Mark all as read
+function markAllRead() {
+    if (confirm('Mark all messages as read?')) {
+        const unreadItems = document.querySelectorAll('.message-item[data-read="False"]');
+        unreadItems.forEach(item => {
+            item.classList.remove('bg-light');
+            item.dataset.read = 'True';
+            const newBadge = item.querySelector('.badge.bg-primary');
+            if (newBadge) newBadge.remove();
+        });
+        
+        updateUnreadCount();
+        showToast('All messages marked as read', 'success');
+    }
+}
+
+// Update unread count
+function updateUnreadCount() {
+    const unreadCount = document.querySelectorAll('.message-item[data-read="False"]').length;
+    document.querySelector('.stat-card .text-warning + div h4').textContent = unreadCount;
+}
+
+// Toast notification
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+// Handle reply form submission
+document.getElementById('replyForm').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+    
+    // Form will submit normally, but we show loading state
+});
+
+// Auto-refresh every 30 seconds for new messages
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        // In a real app, you might check for new messages via AJAX
+        // For now, we'll just update the timestamp
+        console.log('Checking for new messages...');
+    }
+}, 30000);
+</script>
+{% endblock %}

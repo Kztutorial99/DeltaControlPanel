@@ -1,0 +1,419 @@
+
+{% extends "base.html" %}
+
+{% block title %}Payment Management - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-credit-card text-primary me-2"></i>
+                        Payment Management
+                    </h1>
+                    <p class="text-muted mb-0">Kelola pembayaran dan verifikasi subscription</p>
+                </div>
+                <div>
+                    <button class="btn btn-outline-primary" onclick="refreshPayments()">
+                        <i class="fas fa-sync me-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-warning border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock text-warning fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ pending_payments|length }}</h4>
+                            <small class="text-muted">Pending Payments</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-success border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check text-success fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ verified_payments_today }}</h4>
+                            <small class="text-muted">Verified Today</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-danger border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-times text-danger fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">{{ rejected_payments_today }}</h4>
+                            <small class="text-muted">Rejected Today</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm border-start border-info border-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-money-bill text-info fa-2x"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h4 class="mb-0">Rp {{ "{:,.0f}".format(total_revenue_month) }}</h4>
+                            <small class="text-muted">Revenue This Month</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Payments -->
+    {% if pending_payments %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-warning bg-opacity-10 border-0 py-3">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                Pending Payments
+                <span class="badge bg-warning text-dark ms-2">{{ pending_payments|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for payment in pending_payments %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card border">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="mb-1">{{ payment.user.username }}</h6>
+                                    <small class="text-muted">{{ payment.user.email }}</small>
+                                </div>
+                                <span class="badge bg-primary">{{ payment.payment_method }}</span>
+                            </div>
+                            
+                            <div class="payment-details mb-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="border-end">
+                                            <h5 class="mb-0 text-success">Rp {{ "{:,.0f}".format(payment.amount) }}</h5>
+                                            <small class="text-muted">Amount</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="mb-0">{{ payment.subscription_type.replace('_', ' ').title() }}</h6>
+                                        <small class="text-muted">Plan</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="small text-muted mb-1">Transaction ID:</div>
+                                <div class="font-monospace small bg-light p-2 rounded">{{ payment.transaction_id }}</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="small text-muted mb-1">User Details:</div>
+                                <div class="small">
+                                    <i class="fas fa-calendar me-1"></i>{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}<br>
+                                    <i class="fas fa-globe me-1"></i>{{ payment.user.ip_address or 'N/A' }}<br>
+                                    {% if payment.user.device_id %}
+                                        <i class="fas fa-mobile-alt me-1"></i>{{ payment.user.device_id[:30] }}...
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <form method="POST" action="{{ url_for('admin_verify_payment', payment_id=payment.id) }}">
+                                <div class="mb-2">
+                                    <textarea class="form-control form-control-sm" 
+                                              name="admin_notes" 
+                                              placeholder="Admin notes..."
+                                              rows="2"></textarea>
+                                </div>
+                                <div class="d-grid gap-1">
+                                    <button type="submit" name="action" value="approve" 
+                                            class="btn btn-success btn-sm">
+                                        <i class="fas fa-check me-1"></i>Approve & Activate
+                                    </button>
+                                    <button type="submit" name="action" value="reject" 
+                                            class="btn btn-danger btn-sm">
+                                        <i class="fas fa-times me-1"></i>Reject Payment
+                                    </button>
+                                    <button type="button" class="btn btn-info btn-sm" 
+                                            onclick="viewPaymentDetails('{{ payment.id }}')">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Payment History -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history text-info me-2"></i>
+                    Payment History
+                </h5>
+                <div class="d-flex gap-2">
+                    <select class="form-select form-select-sm" id="filterStatus" style="width: auto;">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="verified">Verified</option>
+                        <option value="failed">Rejected</option>
+                    </select>
+                    <select class="form-select form-select-sm" id="filterMethod" style="width: auto;">
+                        <option value="all">All Methods</option>
+                        <option value="OVO">OVO</option>
+                        <option value="DANA">DANA</option>
+                        <option value="GoPay">GoPay</option>
+                        <option value="ShopeePay">ShopeePay</option>
+                        <option value="BCA">BCA</option>
+                        <option value="Mandiri">Mandiri</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Plan</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Verified By</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in all_payments %}
+                        <tr class="payment-row" 
+                            data-status="{{ payment.status }}"
+                            data-method="{{ payment.payment_method }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar bg-primary text-white rounded-circle me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                                        {% if payment.user.is_premium %}
+                                            <i class="fas fa-crown"></i>
+                                        {% else %}
+                                            <i class="fas fa-user"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-medium">{{ payment.user.username }}</div>
+                                        <small class="text-muted">{{ payment.user.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-medium">Rp {{ "{:,.0f}".format(payment.amount) }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ payment.payment_method }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ payment.subscription_type.replace('_', ' ').title() }}</span>
+                            </td>
+                            <td>
+                                {% if payment.status == 'verified' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Verified
+                                    </span>
+                                {% elif payment.status == 'pending' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                {% elif payment.status == 'failed' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times me-1"></i>Rejected
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                {% if payment.verified_at %}
+                                    <br><small class="text-success">Verified: {{ payment.verified_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if payment.verifier %}
+                                    <small class="text-muted">{{ payment.verifier.username }}</small>
+                                {% else %}
+                                    <small class="text-muted">-</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-info" onclick="viewPaymentDetails('{{ payment.id }}')" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if payment.status == 'pending' %}
+                                    <button class="btn btn-outline-success" onclick="quickApprove('{{ payment.id }}')" title="Quick Approve">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger" onclick="quickReject('{{ payment.id }}')" title="Quick Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Details Modal -->
+<div class="modal fade" id="paymentDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-receipt me-2"></i>Payment Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="paymentDetailsContent">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Filter functionality
+document.getElementById('filterStatus').addEventListener('change', filterPayments);
+document.getElementById('filterMethod').addEventListener('change', filterPayments);
+
+function filterPayments() {
+    const statusFilter = document.getElementById('filterStatus').value;
+    const methodFilter = document.getElementById('filterMethod').value;
+    const rows = document.querySelectorAll('.payment-row');
+    
+    rows.forEach(row => {
+        let show = true;
+        
+        if (statusFilter !== 'all' && row.dataset.status !== statusFilter) {
+            show = false;
+        }
+        
+        if (methodFilter !== 'all' && row.dataset.method !== methodFilter) {
+            show = false;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+}
+
+function viewPaymentDetails(paymentId) {
+    const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
+    const content = document.getElementById('paymentDetailsContent');
+    
+    content.innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
+    modal.show();
+    
+    fetch(`/admin/payment-details/${paymentId}`)
+        .then(response => response.text())
+        .then(html => {
+            content.innerHTML = html;
+        })
+        .catch(error => {
+            content.innerHTML = '<div class="alert alert-danger">Error loading payment details</div>';
+        });
+}
+
+function quickApprove(paymentId) {
+    if (confirm('Are you sure you want to approve this payment?')) {
+        const form = new FormData();
+        form.append('action', 'approve');
+        form.append('admin_notes', 'Quick approval');
+        
+        fetch(`/admin/verify-payment/${paymentId}`, {
+            method: 'POST',
+            body: form
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+}
+
+function quickReject(paymentId) {
+    const reason = prompt('Reason for rejection:');
+    if (reason) {
+        const form = new FormData();
+        form.append('action', 'reject');
+        form.append('admin_notes', reason);
+        
+        fetch(`/admin/verify-payment/${paymentId}`, {
+            method: 'POST',
+            body: form
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+}
+
+function refreshPayments() {
+    location.reload();
+}
+
+// Auto refresh every 30 seconds for pending payments
+setInterval(() => {
+    if (document.querySelector('.badge.bg-warning')) {
+        location.reload();
+    }
+}, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Current Subscription Status -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center py-5">
+                    {% if premium_active %}
+                        <div class="subscription-icon text-warning mb-3">
+                            <i class="fas fa-crown" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="h3 text-warning mb-3">Premium Active</h2>
+                        <p class="lead text-muted mb-4">
+                            You have access to all premium features and providers.
+                        </p>
+                        {% if current_user.premium_expires %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                Your premium subscription expires on <strong>{{ current_user.premium_expires.strftime('%B %d, %Y') }}</strong>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="subscription-icon text-muted mb-3">
+                            <i class="fas fa-user" style="font-size: 4rem;"></i>
+                        </div>
+                        <h2 class="h3 text-muted mb-3">Free Plan</h2>
+                        <p class="lead text-muted mb-4">
+                            Upgrade to premium to unlock all features and providers.
+                        </p>
+                        <a href="#upgrade" class="btn btn-warning btn-lg">
+                            <i class="fas fa-crown me-2"></i>Upgrade to Premium
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Plan Comparison -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar text-primary me-2"></i>
+                        Plan Comparison
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Free Plan -->
+                        <div class="col-md-6">
+                            <div class="plan-card border rounded-3 p-4 h-100 {% if not premium_active %}border-primary{% endif %}">
+                                <div class="text-center mb-4">
+                                    <h4 class="h5 text-muted">Free Plan</h4>
+                                    <div class="display-6 fw-bold">Rp 0</div>
+                                    <small class="text-muted">Forever</small>
+                                </div>
+                                
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Basic OTP providers
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        20 requests per hour
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Basic support
+                                    </li>
+                                    <li class="mb-2 text-muted">
+                                        <i class="fas fa-times me-2"></i>
+                                        Premium providers
+                                    </li>
+                                    <li class="mb-2 text-muted">
+                                        <i class="fas fa-times me-2"></i>
+                                        Unlimited requests
+                                    </li>
+                                    <li class="mb-2 text-muted">
+                                        <i class="fas fa-times me-2"></i>
+                                        Priority support
+                                    </li>
+                                </ul>
+                                
+                                {% if not premium_active %}
+                                    <div class="text-center">
+                                        <span class="badge bg-primary">Current Plan</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Premium Plan -->
+                        <div class="col-md-6">
+                            <div class="plan-card border border-warning rounded-3 p-4 h-100 bg-warning bg-opacity-5">
+                                <div class="text-center mb-4">
+                                    <h4 class="h5 text-warning">
+                                        <i class="fas fa-crown me-1"></i>Premium Plan
+                                    </h4>
+                                    <div class="display-6 fw-bold text-warning">Rp 50,000</div>
+                                    <small class="text-muted">Per month</small>
+                                </div>
+                                
+                                <ul class="list-unstyled mb-4">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        All OTP providers
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Unlimited requests
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Priority support
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Premium providers
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Advanced features
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        API rate limit boost
+                                    </li>
+                                </ul>
+                                
+                                <div class="text-center">
+                                    {% if premium_active %}
+                                        <span class="badge bg-warning text-dark">Current Plan</span>
+                                    {% else %}
+                                        <a href="#upgrade" class="btn btn-warning w-100">
+                                            <i class="fas fa-crown me-2"></i>Upgrade Now
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if not premium_active %}
+            <!-- Upgrade Section -->
+            <div class="card border-0 shadow-sm mb-4" id="upgrade">
+                <div class="card-header bg-warning bg-opacity-10 border-0 py-3">
+                    <h5 class="card-title mb-0 text-warning">
+                        <i class="fas fa-star me-2"></i>
+                        Upgrade to Premium
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Payment Process:</strong> Submit your payment details below. Our admin will verify your payment within 24 hours and activate your premium subscription.
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('request_subscription') }}" class="needs-validation" novalidate>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="payment_method" class="form-label">
+                                    <i class="fas fa-credit-card me-1"></i>Payment Method
+                                </label>
+                                <select class="form-select" id="payment_method" name="payment_method" required>
+                                    <option value="">Choose payment method...</option>
+                                    <option value="OVO">OVO</option>
+                                    <option value="DANA">DANA</option>
+                                    <option value="GOPAY">GoPay</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a payment method.
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="amount" class="form-label">
+                                    <i class="fas fa-money-bill me-1"></i>Amount
+                                </label>
+                                <select class="form-select" id="amount" name="amount" required>
+                                    <option value="">Select package...</option>
+                                    <option value="50000">1 Month - Rp 50,000</option>
+                                    <option value="100000">3 Months - Rp 100,000</option>
+                                    <option value="200000">6 Months - Rp 200,000</option>
+                                    <option value="500000">12 Months - Rp 500,000</option>
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a package.
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="payment_reference" class="form-label">
+                                    <i class="fas fa-receipt me-1"></i>Payment Reference / Transaction ID
+                                </label>
+                                <input type="text" class="form-control" id="payment_reference" 
+                                       name="payment_reference" required
+                                       placeholder="Enter transaction ID or reference number">
+                                <div class="form-text">
+                                    Enter the transaction ID from your payment app (OVO/DANA/GoPay)
+                                </div>
+                                <div class="invalid-feedback">
+                                    Payment reference is required.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Instructions -->
+                        <div class="payment-instructions mt-4" style="display: none;">
+                            <div class="alert alert-warning">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-info-circle me-2"></i>Payment Instructions
+                                </h6>
+                                <div id="payment-details"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-warning btn-lg w-100">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Submit Payment Verification
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Pending Payments -->
+            {% if pending_payments %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info bg-opacity-10 border-0 py-3">
+                    <h5 class="card-title mb-0 text-info">
+                        <i class="fas fa-clock me-2"></i>
+                        Pending Payment Verification
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for payment in pending_payments %}
+                    <div class="pending-payment border rounded p-3 mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge bg-primary me-2">{{ payment.payment_method }}</span>
+                                    <span class="badge bg-warning">Pending</span>
+                                </div>
+                                <div class="fw-medium mb-1">{{ payment.amount|currency }}</div>
+                                <div class="text-muted small">
+                                    Reference: <code>{{ payment.payment_reference }}</code>
+                                </div>
+                                <div class="text-muted small">
+                                    Submitted: {{ payment.created_at|datetime }}
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <div class="spinner-border spinner-border-sm text-warning me-2" role="status">
+                                    <span class="visually-hidden">Processing...</span>
+                                </div>
+                                <small class="text-muted">Awaiting verification</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-clock me-2"></i>
+                        Your payment is being verified by our admin team. This usually takes up to 24 hours.
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Benefits Overview -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        Premium Benefits
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="benefit-item d-flex align-items-start">
+                                <div class="benefit-icon bg-warning bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-infinity text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Unlimited Requests</h6>
+                                    <p class="text-muted small mb-0">
+                                        No more hourly limits. Send as many OTP requests as you need.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="benefit-item d-flex align-items-start">
+                                <div class="benefit-icon bg-warning bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-server text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">All Providers</h6>
+                                    <p class="text-muted small mb-0">
+                                        Access to premium OTP providers including exclusive services.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="benefit-item d-flex align-items-start">
+                                <div class="benefit-icon bg-warning bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-headset text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Priority Support</h6>
+                                    <p class="text-muted small mb-0">
+                                        Get faster response times and dedicated support.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="benefit-item d-flex align-items-start">
+                                <div class="benefit-icon bg-warning bg-opacity-10 rounded-circle me-3 d-flex align-items-center justify-content-center flex-shrink-0" 
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-tachometer-alt text-warning"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Advanced Features</h6>
+                                    <p class="text-muted small mb-0">
+                                        Access to advanced API features and higher rate limits.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Form validation
+(function() {
+    'use strict';
+    
+    const forms = document.querySelectorAll('.needs-validation');
+    
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+})();
+
+// Payment method instructions
+const paymentInstructions = {
+    'OVO': {
+        title: 'OVO Payment',
+        details: `
+            <ol>
+                <li>Open your OVO app</li>
+                <li>Send payment to: <strong>081234567890</strong></li>
+                <li>Amount: <strong>As selected above</strong></li>
+                <li>Copy the transaction ID after payment</li>
+                <li>Paste it in the reference field below</li>
+            </ol>
+        `
+    },
+    'DANA': {
+        title: 'DANA Payment',
+        details: `
+            <ol>
+                <li>Open your DANA app</li>
+                <li>Send payment to: <strong>081234567890</strong></li>
+                <li>Amount: <strong>As selected above</strong></li>
+                <li>Copy the transaction ID after payment</li>
+                <li>Paste it in the reference field below</li>
+            </ol>
+        `
+    },
+    'GOPAY': {
+        title: 'GoPay Payment',
+        details: `
+            <ol>
+                <li>Open your Gojek app</li>
+                <li>Go to GoPay transfer</li>
+                <li>Send payment to: <strong>081234567890</strong></li>
+                <li>Amount: <strong>As selected above</strong></li>
+                <li>Copy the transaction ID after payment</li>
+                <li>Paste it in the reference field below</li>
+            </ol>
+        `
+    }
+};
+
+// Show payment instructions
+document.getElementById('payment_method').addEventListener('change', function() {
+    const method = this.value;
+    const instructionsDiv = document.querySelector('.payment-instructions');
+    const detailsDiv = document.getElementById('payment-details');
+    
+    if (method && paymentInstructions[method]) {
+        const instruction = paymentInstructions[method];
+        detailsDiv.innerHTML = `
+            <strong>${instruction.title}</strong>
+            ${instruction.details}
+        `;
+        instructionsDiv.style.display = 'block';
+    } else {
+        instructionsDiv.style.display = 'none';
+    }
+});
+
+// Form submission handling
+document.querySelector('form[action*="request_subscription"]')?.addEventListener('submit', function() {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+});
+
+// Auto-refresh for pending payments (every 30 seconds)
+{% if pending_payments %}
+setInterval(() => {
+    if (document.visibilityState === 'visible') {
+        // Check for payment updates
+        fetch(window.location.href)
+            .then(response => response.text())
+            .then(html => {
+                // Parse response and update pending payments section if needed
+                // This is a simplified implementation
+                console.log('Checking for payment updates...');
+            })
+            .catch(error => {
+                console.error('Error checking payment updates:', error);
+            });
+    }
+}, 30000);
+{% endif %}
+</script>
+{% endblock %}

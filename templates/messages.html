@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - DeltaPro{% endblock %}
+
+{% block content %}
+<div class="messages-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0">
+                <i class="fas fa-envelope me-2"></i>Messages
+            </h1>
+            <p class="text-muted mb-0">Communication with support team</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">
+                <i class="fas fa-plus me-2"></i>New Message
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Message Navigation -->
+<div class="row">
+    <div class="col-lg-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+                    <button class="nav-link active" id="v-pills-received-tab" data-bs-toggle="pill" 
+                            data-bs-target="#v-pills-received" type="button" role="tab">
+                        <i class="fas fa-inbox me-2"></i>Received 
+                        <span class="badge bg-primary ms-auto">{{ received_messages|length }}</span>
+                    </button>
+                    <button class="nav-link" id="v-pills-sent-tab" data-bs-toggle="pill" 
+                            data-bs-target="#v-pills-sent" type="button" role="tab">
+                        <i class="fas fa-paper-plane me-2"></i>Sent
+                        <span class="badge bg-secondary ms-auto">{{ sent_messages|length }}</span>
+                    </button>
+                </div>
+                
+                <div class="mt-4">
+                    <h6 class="text-muted">Quick Actions</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#composeModal">
+                            <i class="fas fa-edit me-1"></i>Compose
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="markAllRead()">
+                            <i class="fas fa-check-double me-1"></i>Mark All Read
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-9">
+        <div class="tab-content" id="v-pills-tabContent">
+            <!-- Received Messages -->
+            <div class="tab-pane fade show active" id="v-pills-received" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-inbox me-2"></i>Received Messages
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if received_messages %}
+                        <div class="message-list">
+                            {% for message in received_messages %}
+                            <div class="message-item {% if not message.is_read %}unread{% endif %}" 
+                                 onclick="viewMessage('{{ message.id }}', 'received')">
+                                <div class="message-header">
+                                    <div class="message-from">
+                                        <i class="fas fa-user-shield text-primary me-2"></i>
+                                        <strong>Support Team</strong>
+                                        {% if message.priority == 'high' %}
+                                        <span class="badge bg-warning ms-2">HIGH PRIORITY</span>
+                                        {% elif message.priority == 'urgent' %}
+                                        <span class="badge bg-danger ms-2">URGENT</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-time text-muted">
+                                        {{ message.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </div>
+                                </div>
+                                <div class="message-subject">
+                                    {% if not message.is_read %}
+                                    <i class="fas fa-circle text-primary me-2" style="font-size: 0.5rem;"></i>
+                                    {% endif %}
+                                    {{ message.subject }}
+                                </div>
+                                <div class="message-preview">
+                                    {{ message.content[:100] }}{% if message.content|length > 100 %}...{% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state text-center py-5">
+                            <i class="fas fa-inbox text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h6 class="text-muted">No received messages</h6>
+                            <p class="text-muted">Messages from support team will appear here</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sent Messages -->
+            <div class="tab-pane fade" id="v-pills-sent" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-paper-plane me-2"></i>Sent Messages
+                        </h6>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if sent_messages %}
+                        <div class="message-list">
+                            {% for message in sent_messages %}
+                            <div class="message-item" onclick="viewMessage('{{ message.id }}', 'sent')">
+                                <div class="message-header">
+                                    <div class="message-from">
+                                        <i class="fas fa-arrow-right text-success me-2"></i>
+                                        <strong>To: Support Team</strong>
+                                    </div>
+                                    <div class="message-time text-muted">
+                                        {{ message.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                    </div>
+                                </div>
+                                <div class="message-subject">
+                                    {{ message.subject }}
+                                </div>
+                                <div class="message-preview">
+                                    {{ message.content[:100] }}{% if message.content|length > 100 %}...{% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state text-center py-5">
+                            <i class="fas fa-paper-plane text-muted mb-3" style="font-size: 3rem;"></i>
+                            <h6 class="text-muted">No sent messages</h6>
+                            <p class="text-muted mb-3">Start a conversation with our support team</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#composeModal">
+                                <i class="fas fa-plus me-2"></i>Send First Message
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compose Message Modal -->
+<div class="modal fade" id="composeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>New Message to Support
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('send_message') }}" id="composeForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="messageSubject" class="form-label">
+                            <i class="fas fa-tag me-2"></i>Subject
+                        </label>
+                        <input type="text" class="form-control" id="messageSubject" name="subject" 
+                               placeholder="Enter message subject" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="messageContent" class="form-label">
+                            <i class="fas fa-comment me-2"></i>Message
+                        </label>
+                        <textarea class="form-control" id="messageContent" name="content" rows="8" 
+                                  placeholder="Describe your issue, question, or feedback in detail..." required></textarea>
+                        <div class="form-text">
+                            Please provide as much detail as possible to help us assist you better.
+                        </div>
+                    </div>
+                    
+                    <div class="message-templates">
+                        <label class="form-label">Quick Templates:</label>
+                        <div class="btn-group-vertical w-100" role="group">
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-start" 
+                                    onclick="useTemplate('technical')">
+                                <i class="fas fa-bug me-2"></i>Technical Issue
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-start" 
+                                    onclick="useTemplate('billing')">
+                                <i class="fas fa-credit-card me-2"></i>Billing Question
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-start" 
+                                    onclick="useTemplate('feature')">
+                                <i class="fas fa-lightbulb me-2"></i>Feature Request
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm text-start" 
+                                    onclick="useTemplate('general')">
+                                <i class="fas fa-question-circle me-2"></i>General Support
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- View Message Modal -->
+<div class="modal fade" id="viewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalTitle">
+                    <i class="fas fa-envelope-open me-2"></i>Message Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="messageDetails">
+                    <!-- Message details will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="replyToMessage()">
+                    <i class="fas fa-reply me-2"></i>Reply
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Support Guidelines -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Support Guidelines
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-clock text-primary me-2"></i>Response Times</h6>
+                        <ul class="list-unstyled small">
+                            <li>• General inquiries: 4-8 hours</li>
+                            <li>• Technical issues: 2-4 hours</li>
+                            <li>• Premium users: 1-2 hours</li>
+                            <li>• Urgent issues: 30 minutes</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-lightbulb text-warning me-2"></i>Best Practices</h6>
+                        <ul class="list-unstyled small">
+                            <li>• Be specific and detailed</li>
+                            <li>• Include error messages</li>
+                            <li>• Mention your plan type</li>
+                            <li>• Provide steps to reproduce</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6><i class="fas fa-star text-success me-2"></i>Priority Levels</h6>
+                        <ul class="list-unstyled small">
+                            <li>• <span class="badge bg-danger">Urgent</span> System down</li>
+                            <li>• <span class="badge bg-warning">High</span> Service issues</li>
+                            <li>• <span class="badge bg-info">Normal</span> General support</li>
+                            <li>• <span class="badge bg-secondary">Low</span> Questions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const messageTemplates = {
+    technical: {
+        subject: 'Technical Issue - OTP Service',
+        content: `Hello Support Team,
+
+I am experiencing a technical issue with the OTP service. 
+
+Issue Description:
+[Please describe the problem in detail]
+
+Steps to Reproduce:
+1. [First step]
+2. [Second step]
+3. [Third step]
+
+Expected Result:
+[What should happen]
+
+Actual Result:
+[What actually happens]
+
+Error Messages (if any):
+[Include any error messages]
+
+Additional Information:
+- Browser: [Your browser and version]
+- Device: [Your device type]
+- Account Type: [Free/Premium]
+
+Thank you for your assistance.
+
+Best regards,
+{{ user.username }}`
+    },
+    billing: {
+        subject: 'Billing Question',
+        content: `Hello Support Team,
+
+I have a question regarding my billing/subscription.
+
+Question:
+[Please describe your billing question]
+
+Account Details:
+- Username: {{ user.username }}
+- Current Plan: {% if user.is_premium %}Premium{% else %}Free{% endif %}
+- Payment Method: [If applicable]
+- Transaction ID: [If applicable]
+
+Thank you for your help.
+
+Best regards,
+{{ user.username }}`
+    },
+    feature: {
+        subject: 'Feature Request',
+        content: `Hello Support Team,
+
+I would like to suggest a new feature for the DeltaPro platform.
+
+Feature Description:
+[Describe the feature you would like to see]
+
+Use Case:
+[Explain how this feature would be useful]
+
+Benefits:
+[List the benefits this feature would provide]
+
+Additional Notes:
+[Any additional information]
+
+Thank you for considering this request.
+
+Best regards,
+{{ user.username }}`
+    },
+    general: {
+        subject: 'General Support Request',
+        content: `Hello Support Team,
+
+I need assistance with the following:
+
+[Please describe your question or issue]
+
+Thank you for your support.
+
+Best regards,
+{{ user.username }}`
+    }
+};
+
+function useTemplate(templateType) {
+    const template = messageTemplates[templateType];
+    if (template) {
+        document.getElementById('messageSubject').value = template.subject;
+        document.getElementById('messageContent').value = template.content;
+    }
+}
+
+function viewMessage(messageId, type) {
+    // In a real implementation, this would fetch message details via AJAX
+    // For now, we'll show a placeholder
+    const messageDetails = document.getElementById('messageDetails');
+    messageDetails.innerHTML = `
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Message viewing functionality will be implemented with AJAX to fetch full message details.
+            Message ID: ${messageId}, Type: ${type}
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('viewModal'));
+    modal.show();
+}
+
+function replyToMessage() {
+    // Close view modal and open compose modal for reply
+    bootstrap.Modal.getInstance(document.getElementById('viewModal')).hide();
+    
+    setTimeout(() => {
+        const composeModal = new bootstrap.Modal(document.getElementById('composeModal'));
+        document.getElementById('messageSubject').value = 'Re: ';
+        composeModal.show();
+    }, 300);
+}
+
+function markAllRead() {
+    if (confirm('Mark all messages as read?')) {
+        // In a real implementation, this would make an AJAX call
+        alert('All messages marked as read!');
+        location.reload();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    document.getElementById('composeForm').addEventListener('submit', function(e) {
+        const subject = document.getElementById('messageSubject').value.trim();
+        const content = document.getElementById('messageContent').value.trim();
+        
+        if (!subject || subject.length < 5) {
+            e.preventDefault();
+            alert('Please enter a subject (minimum 5 characters)');
+            return;
+        }
+        
+        if (!content || content.length < 20) {
+            e.preventDefault();
+            alert('Please enter a detailed message (minimum 20 characters)');
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+        submitBtn.disabled = true;
+    });
+    
+    // Clear form when modal closes
+    document.getElementById('composeModal').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('composeForm').reset();
+        const submitBtn = document.querySelector('#composeForm button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Message';
+        submitBtn.disabled = false;
+    });
+    
+    // Character counter for message content
+    const messageContent = document.getElementById('messageContent');
+    if (messageContent) {
+        const charCounter = document.createElement('div');
+        charCounter.className = 'form-text text-end';
+        charCounter.id = 'charCounter';
+        messageContent.parentNode.appendChild(charCounter);
+        
+        messageContent.addEventListener('input', function() {
+            const count = this.value.length;
+            charCounter.textContent = `${count} characters`;
+            
+            if (count < 20) {
+                charCounter.className = 'form-text text-end text-danger';
+            } else {
+                charCounter.className = 'form-text text-end text-muted';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
